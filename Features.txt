@@ -1,0 +1,9 @@
+Regular Storage File Types:
+-Documents (.docx, .txt)
+-Spreadsheets (.xslx)
+-Videos
+-Images
+
+Obscure:
+-Passwords
+-Crypto Wallet (BTC, ETH)
