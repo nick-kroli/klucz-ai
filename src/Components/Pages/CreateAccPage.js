@@ -1,6 +1,8 @@
+// CreateAccPage.js
+
 import React, { useState } from 'react';
 
-const LoginPage = ({ onLogin, onSignUp, onCreateAccount }) => {
+const CreateAccPage = ({ onCreateClick }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
@@ -12,23 +14,13 @@ const LoginPage = ({ onLogin, onSignUp, onCreateAccount }) => {
     setPassword(event.target.value);
   };
 
-  const handleLogin = () => {
-    // Perform login logic, e.g., validate credentials
-    onLogin(username, password);
-  };
-
-  const handleSignUp = () => {
-    // Navigate to sign-up page or perform sign-up logic
-    onSignUp();
-  };
-
   const handleCreateAccountClick = () => {
-    onCreateAccount();
+    onCreateClick(username, password);
   };
 
   return (
-    <div className="login-page">
-      <h2>Login hi</h2>
+    <div className="create-account-page">
+      <h2>Create Account</h2>
       <form>
         <div className="form-group">
           <label htmlFor="username">Username:</label>
@@ -51,8 +43,6 @@ const LoginPage = ({ onLogin, onSignUp, onCreateAccount }) => {
           />
         </div>
         <div className="form-actions">
-          <button type="button" onClick={handleLogin}>Login</button>
-          <button type="button" onClick={handleSignUp}>Sign Up</button>
           <button type="button" onClick={handleCreateAccountClick}>Create Account</button>
         </div>
       </form>
@@ -60,4 +50,4 @@ const LoginPage = ({ onLogin, onSignUp, onCreateAccount }) => {
   );
 };
 
-export default LoginPage;
+export default CreateAccPage;

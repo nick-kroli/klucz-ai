@@ -1,30 +1,31 @@
 import React from 'react';
 import './App.css';
-import LoginPage from './Components/Pages/Login.js';
+
+import LoginContainer from './Components/Containers/LoginContainer.js';
+import CreateContainer from './Components/Containers/CreateContainer.js';
+import HomeContainer from './Components/Containers/HomeContainer.js';
+
+import {
+  BrowserRouter as Router,
+  Routes, // instead of "Switch"
+  Route,
+} from "react-router-dom";
 
 function App() {
-  // Define functions for handling login and sign-up actions
-  const handleLogin = (username, password) => {
-    // Logic for handling login
-    console.log('Logging in with username:', username, 'and password:', password);
-  };
-
-  const handleSignUp = () => {
-    // Logic for handling sign-up
-    console.log('Navigating to sign-up page or performing sign-up logic');
-  };
 
   return (
-    <div className="App">
-      <main>
-        {/* Render the LoginPage component */}
-        <LoginPage onLogin={handleLogin} onSignUp={handleSignUp} />
-      </main>
-      <footer>
-        {/* Include any footer content here */}
-      </footer>
-    </div>
+    <Router>
+      <div className="App">
+        <Routes>
+          <Route path = "/" Component={LoginContainer}/>
+          <Route path="/login" Component={LoginContainer}/>
+          <Route path="/create-account" Component={CreateContainer}/>
+          <Route path="/home" Component={HomeContainer}/>
+        </Routes>
+      </div>
+    </Router>
   );
+  
 }
 
 export default App;
