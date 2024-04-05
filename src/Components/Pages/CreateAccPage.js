@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 const CreateAccPage = ({ onCreateClick }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('')
 
   const handleUsernameChange = (event) => {
     setUsername(event.target.value);
@@ -14,14 +15,28 @@ const CreateAccPage = ({ onCreateClick }) => {
     setPassword(event.target.value);
   };
 
+  const handleEmailChange = (event) => {
+    setEmail(event.target.value)
+  }
+
   const handleCreateAccountClick = () => {
-    onCreateClick(username, password);
+    onCreateClick(username, password, email);
   };
 
   return (
     <div className="create-account-page">
       <h2>Create Account</h2>
       <form>
+        <div className="form-group">
+          <label htmlFor="email">Email:</label>
+          <input
+            type="text"
+            id="email"
+            value={email}
+            onChange={handleEmailChange}
+            required
+          />
+        </div>
         <div className="form-group">
           <label htmlFor="username">Username:</label>
           <input
@@ -42,6 +57,7 @@ const CreateAccPage = ({ onCreateClick }) => {
             required
           />
         </div>
+        
         <div className="form-actions">
           <button type="button" onClick={handleCreateAccountClick}>Create Account</button>
         </div>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const LoginPage = ({ onLogin, onSignUp, onCreateAccount }) => {
+const LoginPage = ({ onLogin, onCreateAccount }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
@@ -16,12 +16,6 @@ const LoginPage = ({ onLogin, onSignUp, onCreateAccount }) => {
     // Perform login logic, e.g., validate credentials
     onLogin(username, password);
   };
-
-  const handleSignUp = () => {
-    // Navigate to sign-up page or perform sign-up logic
-    onSignUp();
-  };
-
   const handleCreateAccountClick = () => {
     onCreateAccount();
   };
@@ -52,7 +46,6 @@ const LoginPage = ({ onLogin, onSignUp, onCreateAccount }) => {
         </div>
         <div className="form-actions">
           <button type="button" onClick={handleLogin}>Login</button>
-          <button type="button" onClick={handleSignUp}>Sign Up</button>
           <button type="button" onClick={handleCreateAccountClick}>Create Account</button>
         </div>
       </form>
