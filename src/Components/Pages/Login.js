@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
+import { useContext } from 'react';
+import { Account, AccountContext } from '../../SessionsAccount/Account.js';
 
 const LoginPage = ({ onLogin, onCreateAccount }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const { authenticate } = useContext(AccountContext)
 
   const handleUsernameChange = (event) => {
     setUsername(event.target.value);
