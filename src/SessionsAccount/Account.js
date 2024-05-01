@@ -29,23 +29,25 @@ const Account = (props) => {
     });
   }
 
-  const authenticate = async (Username, Password) => {
+  const authenticate = async (Username, Password, setErrMess) => {
     return await new Promise ((resolve, reject) => {
-      const user = new CognitoUser({Username,Pool});
-      
+      const user = new CognitoUser({Username,Pool}); 
       const authDetails = new AuthenticationDetails({Username,Password});
     
       user.authenticateUser(authDetails, {
         onSuccess: (data) => {
           console.log("onSuccess: ", data);
-          
-          navigate('/home')
-          resolve(data)
+          navigate('/home');
+          resolve(data);
         },
         onFailure: (err) => {
           console.error("onFailure: ", err);
-          reject(err)
-          return(<div>WRONG</div>);
+          if(err.message === "Missing required parameter USERNAME" || err.message === "Missing required parameter PASSWORD"){
+            setErrMess("Missing username or password")
+          }else if(err.message === "Incorrect username or password."){
+            setErrMess("Invalid username or password");
+          }
+          reject(err);
         },
         newPasswordRequired: (data) => {
           console.log("newPasswordRequired: ", data);

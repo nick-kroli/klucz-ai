@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import { useContext } from 'react';
 import { Account, AccountContext } from '../../SessionsAccount/Account.js';
 
-const LoginPage = ({ onLogin, onCreateAccount }) => {
+const LoginPage = ({ onLogin, onCreateAccount, errorMess }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const { authenticate } = useContext(AccountContext)
-
+  // console.log("From LoginPage: ", errorMess)
   const handleUsernameChange = (event) => {
     setUsername(event.target.value);
   };
@@ -52,6 +52,11 @@ const LoginPage = ({ onLogin, onCreateAccount }) => {
           <button type="button" onClick={handleCreateAccountClick}>Create Account</button>
         </div>
       </form>
+      {errorMess && (
+        <div style={{ color: 'red', textAlign: 'center' }}>
+          {errorMess}
+        </div>
+      )}
     </div>
   );
 };
