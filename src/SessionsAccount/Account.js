@@ -7,7 +7,28 @@ const AccountContext = createContext();
 
 const Account = (props) => {
   const navigate = useNavigate();
-  console.log("rendering account ")
+  // console.log("rendering account ")
+
+  const getSession = async () => {
+    return await new Promise((resolve, reject) => {
+      // console.log("GET SESSION WORKING");
+      const user = Pool.getCurrentUser();
+      if (user) {
+        user.getSession((err, session) => {
+          if (err){
+            reject(err);
+          }
+          else{
+            resolve(session);
+          }
+        });
+      }
+      else{
+        console.log("logged out detected")
+      }
+    });
+  }
+
   const authenticate = async (Username, Password) => {
     return await new Promise ((resolve, reject) => {
       const user = new CognitoUser({Username,Pool});
@@ -17,23 +38,35 @@ const Account = (props) => {
       user.authenticateUser(authDetails, {
         onSuccess: (data) => {
           console.log("onSuccess: ", data);
+          
           navigate('/home')
           resolve(data)
         },
         onFailure: (err) => {
           console.error("onFailure: ", err);
           reject(err)
+          return(<div>WRONG</div>);
         },
         newPasswordRequired: (data) => {
           console.log("newPasswordRequired: ", data);
           resolve(data)
         }
       });
-    });
+    }); 
+  };
+
+  const logout = () => {
+    const user = Pool.getCurrentUser();
+    if (user){
+      console.log("logging out")
+      user.signOut();
+      navigate("/login");
+    }
     
-  }
+  };
+  
   return (
-    <AccountContext.Provider value={{authenticate}}>
+    <AccountContext.Provider value={{authenticate, getSession, logout}}>
       {props.children}
     </AccountContext.Provider>
   )

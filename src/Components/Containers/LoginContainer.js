@@ -9,7 +9,8 @@ import { CognitoUser, AuthenticationDetails } from 'amazon-cognito-identity-js';
 import { Account, AccountContext } from '../../SessionsAccount/Account.js';
 
 const LoginContainer = () => {
-  const { authenticate } = useContext(AccountContext)
+  const { authenticate, getSession } = useContext(AccountContext)
+  
   const navigate = useNavigate();
   const handleLogin = (username, password) => {
     console.log('Logging in with username:', username, 'and password:', password);

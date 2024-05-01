@@ -5,12 +5,12 @@ import { useNavigate} from 'react-router-dom';
 const HomeContainer = () => {
   const navigate = useNavigate();
 
-  const handleLogOut = () => {
-    console.log('Navigating to login page');
-    navigate('/login');
-  }
+  // const handleLogOut = () => {
+  //   console.log('Navigating to login page');
+  //   navigate('/login');
+  // }
 
-  return <HomePage onLogOut={handleLogOut}/>;
+  return <HomePage/>;
 };
 
 

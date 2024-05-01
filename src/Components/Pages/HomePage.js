@@ -2,9 +2,9 @@ import React from 'react'
 
 const HomePage = ({onLogOut}) => {
 
-  const handleLogOut = () => {
-    onLogOut();
-  }
+  // const handleLogOut = () => {
+  //   onLogOut();
+  // }
 
 
   return(
@@ -12,11 +12,6 @@ const HomePage = ({onLogOut}) => {
     <h1>
       WITAM W KLUCZ AI
     </h1>
-    <form>
-      <div className="form-actions">
-        <button type="button" onClick={handleLogOut}>Log out</button>
-      </div>
-    </form>
   </div>
   );
 };
