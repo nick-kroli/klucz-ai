@@ -1,12 +1,6 @@
 import React from 'react'
 
 const HomePage = ({onLogOut}) => {
-
-  // const handleLogOut = () => {
-  //   onLogOut();
-  // }
-
-
   return(
   <div>
     <h1>

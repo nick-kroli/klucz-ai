@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 
-const CreateAccPage = ({ onCreateClick }) => {
+const CreateAccPage = ({ onCreateClick, errorMess}) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState('')
@@ -62,6 +62,11 @@ const CreateAccPage = ({ onCreateClick }) => {
           <button type="button" onClick={handleCreateAccountClick}>Create Account</button>
         </div>
       </form>
+      {errorMess && (
+        <div style={{ color: 'red', textAlign: 'center' }}>
+          {errorMess}
+        </div>
+      )}
     </div>
   );
 };
