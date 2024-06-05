@@ -8,10 +8,14 @@ import UserPool from '../../Cognito/UserPool.js';
 import { CognitoUser, AuthenticationDetails } from 'amazon-cognito-identity-js';
 import { Account, AccountContext } from '../../SessionsAccount/Account.js';
 import { useState } from 'react';
+
+
 const LoginContainer = () => {
+  
   const { authenticate, getSession } = useContext(AccountContext)
   const [errMess, setErrMess] = useState("");
   const navigate = useNavigate();
+
   const handleLogin = (username, password) => {
     console.log('Logging in with username:', username, 'and password:', password);
 

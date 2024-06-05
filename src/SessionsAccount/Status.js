@@ -22,10 +22,10 @@ const Status = () => {
     };
 
     fetchSession();
-  }, [getSession, auth]); // Only run effect when getSession changes
+  }, [getSession, auth, sessionStorage]); // Only run effect when getSession changes
 
   const handleLogout = async () => {
-    await logout();
+    logout();
     console.log("setting status to false");
     setAuth(false);
   };
