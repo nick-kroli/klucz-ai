@@ -1,17 +1,50 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import HomePage from '../Pages/HomePage';
 import { useNavigate} from 'react-router-dom'; 
+import axios from 'axios';
+import { useState } from 'react';
+
 
 const HomeContainer = () => {
   const navigate = useNavigate();
+  const [appsMap, setAppsMap] = useState({});
+  
 
-  // const handleLogOut = () => {
-  //   console.log('Navigating to login page');
-  //   navigate('/login');
-  // }
+  useEffect(() => {
+    const getAppsList = async () => {
+      try{
+        const token = localStorage.getItem('token');
+        // console.log("token", token);
+        const response = await axios.post('http://localhost:3001/api/get-password-info', {}, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        // console.log("RESPONSE", response.data[0]);
+        return response.data
+        
+      }catch (err){
+        console.log("Error getting passwords", err);
+      }
+    };
+  
+    getAppsList().then(result => {
+      // Access result here
+  
+      console.log("RES", result[0]);
+      setAppsMap(result[0]);
+    }).catch(error => {
+      // Handle error here
+      console.error(error);
+    });
+  
+    // console.log("APPS", Object.keys(appsMap))
+  }, []);
+  // const managed_apps_list = ['app1', 'app2', 'app3', 'app4', 'app5', 'app6', 'app7', 'app8'];
 
-  return <HomePage/>;
+
+  return <HomePage managed_apps={Object.keys(appsMap)}/>;
 };
 
-
+//NEXT TASK: BIG CONTAINER EXPANDS WITH NUMBER OF APPS
 export default HomeContainer;

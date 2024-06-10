@@ -53,7 +53,7 @@ const WelcomePage = ({ onSubmitClick, applications }) => {
 
   return (
     <div>
-      <h1>WELCOME TO KLUCZ</h1>
+      <h1 >WELCOME TO KLUCZ</h1>
       <h3>Lets get started by choosing a few applications you are interested in managing your passwords for!</h3>
 
       <div className="search-bar-container">

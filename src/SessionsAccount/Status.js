@@ -43,10 +43,10 @@ const Status = () => {
   }, [auth, newUser]);
 
   
-
+  
   return (
    <div>
-      {auth && <Navbar handleLogout={handleLogout} />}
+      {!newUser && auth && <Navbar handleLogout={handleLogout} />}
     </div>
 
 

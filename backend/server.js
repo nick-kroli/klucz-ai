@@ -128,6 +128,7 @@ app.get('/api/getSession', async (req, res) => {
 
 //DECODES TOKEN, LOGS OUT USER
 app.post('/api/logout', async (req, res) => {
+  console.log(req.headers);
   const token = req.headers.authorization?.split(' ')[1];
   if (!token) {
     return res.status(401).json({ message: 'No token provided' });
@@ -212,4 +213,35 @@ app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
 
+
+
+app.post('/api/get-password-info', async (req, res) => {
+  // console.log("AT LEAST GETS HERE");
+  console.log("HEADERS: ", req.headers);
+  const token = req.headers.authorization?.split(' ')[1];
+  console.log("TOKEN", token);
+  if (!token) {
+    return res.status(401).json({ message: 'No token provided' });
+  }
+  
+  const decoded = jwt.verify(token, SECRET_KEY);
+  const username = decoded.username;
+
+  const params = {
+    TableName: 'klucz-ai-passwordTestTable', // Replace with your table name
+    Key: {
+      username: username, // Partition key
+    }
+  };
+
+  try{
+    const data = await dynamoDb.get(params).promise();
+    managed_apps = data.Item['managed-apps'];
+    res.status(200).json(managed_apps)
+
+  } catch (err){
+    console.log(err);
+  }
+
+});
 

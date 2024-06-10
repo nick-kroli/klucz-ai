@@ -1,7 +1,10 @@
 import React from 'react'
 import Sidebar from './Sidebar';
 import { useState } from 'react';
-const HomePage = ({onLogOut}) => {
+import './HomePage.css';
+
+
+const HomePage = ({managed_apps}) => {
 
   const [isCollapsed, setCollapsed] = useState(true);
 
@@ -25,8 +28,17 @@ const HomePage = ({onLogOut}) => {
         </nav>
       </div>
       <div className="content">
-        <h1>Welcome back to klucz AI!</h1>
+        <h1 style={{backgroundColor: 'red'}}>Welcome back to klucz AI!</h1>
+        <div className='dashboard'>hi</div>
         {/* Add your main content here */}
+        <div className='big-password-container'>
+          {managed_apps.map((app, index) => (
+            <div className="small-password-container" key={index}>
+              {/* Add content related to each app */}
+              {app}
+            </div>
+          ))} 
+        </div>
       </div>
     </div>
   );
