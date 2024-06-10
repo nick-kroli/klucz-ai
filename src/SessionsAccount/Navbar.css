@@ -1,0 +1,64 @@
+body {
+  margin-top: 75px; /* Adjust this value if your navbar height changes */
+}
+
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  background-color: darkcyan;
+  color: white;
+  height: 75px;
+  position: fixed; /* Fixes the navbar at the top */
+  top: 0; /* Positions the navbar at the top */
+  left: 0;
+  width: 100%; /* Ensures the navbar spans the full width */
+  z-index: 1000; /* Ensures the navbar stays above other elements */
+}
+
+.navbar-left {
+  flex: 1;
+  display: flex;
+  padding-left: 10px;
+  justify-content: flex-start;
+}
+
+.navbar-right {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  padding-right: 2%;
+}
+
+.navbar ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+}
+
+.navbar li {
+  margin-left: 20px;
+}
+
+.navbar button {
+  background-color: black;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-size: 18px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.navbar button:hover {
+  background-color: #777;
+}
+
+.navbar button:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #aaa;
+}

@@ -4,13 +4,14 @@ import React, {createContext} from "react";
 import { useNavigate} from 'react-router-dom';
 import axios from 'axios';
 import { jwtDecode } from "jwt-decode";
-
+import useAuth from "../hooks/useAuth";
 const AccountContext = createContext();
 const SECRET_KEY = 'iamcurrentlyinamilanhotelroom';
 
 
 const Account = (props) => {
 
+  const {auth, setAuth, newUser, setNewUser} = useAuth();
   const navigate = useNavigate();
   const apiUrl = process.env.REACT_APP_API_URL;
 
@@ -81,12 +82,13 @@ const Account = (props) => {
       console.log("trying api url: ", apiUrl);
       const response = await axios.post('http://localhost:3001/api/authenticate', {Username, Password});
       // console.log("onSuccess: ", response.data);
-      const [session, token] = response.data;
+      const [session, token, new_user] = response.data;
+      console.log("FLAG: ", new_user);
+      setNewUser(new_user);
       // console.log("DECODED TOKEN1, ", token);
       const decodedToken = jwtDecode(token);
       // console.log("DECODED TOKEN2: ", decodedToken);
       localStorage.setItem('token',token);
-      navigate('/home');
       return response.data;
     } catch (err){
       console.error("onFailure: ", err);
@@ -94,6 +96,8 @@ const Account = (props) => {
       throw err;
     }
   };
+
+
 
   // LOGOUT PRE BACKEND
   // const logout = () => {
@@ -109,7 +113,7 @@ const Account = (props) => {
     try{
       const token = localStorage.getItem('token');
       if(token){
-        console.log("token exists");
+        // console.log("token exists");
       }
       await axios.post('http://localhost:3001/api/logout', {}, {
         headers: {

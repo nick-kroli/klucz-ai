@@ -1,0 +1,53 @@
+/* HomePage.css */
+
+
+
+.home-page {
+  display: flex;
+  height: 100vh;
+}
+
+.sidebar {
+  width: 250px;
+  transition: width 0.3s;
+  background-color: #333;
+  color: white;
+  padding: 10px;
+  height: 100%;
+  padding-top: 50px;
+  position: fixed;
+}
+
+.sidebar.collapsed {
+  width: 50px;
+}
+
+.sidebar button {
+  display: block;
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 10px;
+  background-color: #444;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.sidebar nav ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.sidebar nav ul li {
+  margin: 10px 0;
+}
+
+.sidebar nav ul li a {
+  color: white;
+  text-decoration: none;
+}
+
+.content {
+  flex-grow: 1;
+  padding: 20px;
+}

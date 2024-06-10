@@ -16,7 +16,7 @@ const LoginPage = ({ onLogin, onCreateAccount, errorMess }) => {
   };
 
   const handleLogin = () => {
-    // Perform login logic, e.g., validate credentials
+ 
     onLogin(username, password);
   };
   const handleCreateAccountClick = () => {
@@ -25,7 +25,7 @@ const LoginPage = ({ onLogin, onCreateAccount, errorMess }) => {
 
   return (
     <div className="login-page">
-      <h2>Login hi</h2>
+      <h2>Login</h2>
       <form>
         <div className="form-group">
           <label htmlFor="username">Username:</label>
