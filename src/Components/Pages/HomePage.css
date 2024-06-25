@@ -1,29 +1,246 @@
-.dashboard{
+.dashboard {
   background-color: lightgray;
   margin-left: 15%;
   margin-right: 5%;
-  height: 25%;
+  height: 80%;
   border-radius: 10px;
-}
-
-.big-password-container{
-  background-color: lightgray;
-  border-radius: 10px;
-  margin-left: 15%;
-  margin-right: 5%;
-  height:75%;
-  margin-top: 20px;
+  margin-top: 30px;
   display: flex;
-  /* justify-content: center; */
-  align-items: center;
   flex-direction: column;
 }
 
-.small-password-container{
-  background-color: darkgray;
-  width:90%;
-  height: 20%;
+.dashboard-title {
+  background-color: grey;
+  height: 5%;
+  width: 100%;
   border-radius: 10px;
-  margin-top: 20px;
   display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.dash-row1 {
+  display: flex;
+  flex-direction: row;
+  height: 40%;
+  margin-top: 10px; /* Add some space between the title and the row */
+}
+
+.dashboard-health,
+.dashboard-analytics,
+.dashboard-recent {
+  background-color: white;
+  border-radius: 10px;
+  margin: 0.5%; /* Add some space between the items */
+}
+
+.dashboard-health {
+  height: 100%;
+  width: 30%;
+}
+
+.dashboard-analytics {
+  height: 100%;
+  width: 40%;
+  display: flex;
+  justify-content: center;
+}
+
+.dashboard-recent {
+  height: 100%;
+  width: 30%;
+  display: flex;
+  justify-content: center;
+}
+
+.big-password-container {
+  background-color: lightgray;
+  border-radius: 10px;
+  margin-left: 15%;
+  margin-right: 5%;
+  margin-top: 20px;
+  margin-bottom: 20px; /* Add margin-bottom to space out the containers */
+  display: flex;
+  align-items: center; 
+  flex-direction: column;
+  height:300px;
+
+  /* justify-content:space-around; */
+}
+
+.small-password-container {
+  z-index: 2;
+  background-color: white;
+  width: 90%;
+  border-radius: 10px;
+  /* margin: 10px 0;  */
+  padding: 10px;
+  border: 1px solid #bdc3c7;
+  transition: margin-top .5s;
+}
+
+.small-password-container.expanded {
+  margin-top: 1px; /* Adjust the margin when expanded */
+}
+
+
+.small-password-container:hover {
+  background-color: #e1e2e2;
+}
+
+
+.password-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.password-row img.app-logo {
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
+}
+
+.password-row .app-name {
+  flex: 1;
+  font-weight: bold;
+}
+
+.password-row .username {
+  flex: 2;
+}
+
+.password-row .password-last-changed{
+  flex: 4;
+}
+
+.password-row .password-date-added{
+  flex:3;
+}
+
+.password-row .select-box,
+.password-row .star-box,
+.password-row .delete-box {
+  margin-left: 10px;
+}
+
+.password-row .select-box {
+  width: 16px;
+  height: 16px;
+}
+
+.password-row .star-box,
+.password-row .delete-box {
+  cursor: pointer;
+}
+
+.password-row .star-box:hover,
+.password-row .delete-box:hover {
+  color: #3498db;
+}
+
+.subcategories {
+  background-color: rgb(73, 72, 72);
+  font-size: 0.9em; /* smaller font size */
+  padding-left: 20px; /* indentation to distinguish subcategories */
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.3s ease-out;
+}
+
+.subcategories.open {
+  max-height: 500px; /* Adjust this value to a reasonable maximum height */
+}
+
+.subcategories li {
+  margin: 5px 0; /* spacing between subcategory items */
+}
+
+.category-title {
+  padding-top: 1.5%;
+  width: 90%;
+  border-radius: 10px;
+  text-align: left;
+  margin-left: 2%;
+  margin-bottom: 2%;
+  font-size: 25px;
+  font-weight: 500;
+  color: rgb(73, 72, 72);
+}
+
+.password-search {
+  background-color: lightgray;
+  margin-left: 15%;
+  margin-right: 5%;
+  margin-top: 20px;
+  padding: 10px;
+  border-radius: 10px;
+  display: flex;
+  justify-content: center; /* Center the search bar */
+  align-items: center;
+}
+
+.search-input {
+  width: 100%;
+  max-width: 600px; /* Limit the width of the search bar */
+  padding: 10px;
+  border: 1px solid #bdc3c7;
+  border-radius: 4px;
+  box-sizing: border-box;
+  font-size: 16px;
+}
+
+.password-details {
+  z-index: 1;
+  background-color: #bebebe;
+  padding: 10px;
+  border: 1px solid #bdc3c7;
+  border-radius: 10px;
+  width: 90%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.password-details button {
+  margin-right: 10px;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  background-color: #3498db;
+  color: white;
+
+}
+
+.password-details button:hover {
+  background-color: #2980b9;
+}
+
+.password-details-enter{
+  animation: slideDownPass 0.5s forwards;
+}
+
+.password-details-exit{
+  animation: slideUpPass 0.5s forwards;
+}
+
+@keyframes slideDownPass {
+
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUpPass {
+  0% {
+    transform: translateY(0%);
+  }
+  100% {
+    transform: translateY(-100%);
+  }
 }

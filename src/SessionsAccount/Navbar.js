@@ -10,6 +10,9 @@ const Navbar = ({ handleLogout }) => {
       <div className="navbar-left">
         <button onClick={() => navigate("/account")}>Account</button>
       </div>
+      <div className="navbar-center">
+        KLUCZ AI
+      </div>
       <div className="navbar-right">
         <ul>
           <li>

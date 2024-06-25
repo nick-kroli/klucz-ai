@@ -1,16 +1,65 @@
-import React from 'react'
+import React, { useState, useEffect, useRef } from 'react';
 import Sidebar from './Sidebar';
-import { useState } from 'react';
 import './HomePage.css';
 
-
-const HomePage = ({managed_apps}) => {
-
+const HomePage = ({ managed_apps_keys, managed_apps_vals }) => {
   const [isCollapsed, setCollapsed] = useState(true);
+  const [passwordVisibility, setPasswordVisibility] = useState(
+    Array(managed_apps_keys.length).fill(false)
+  );
+  const [showSubcategories, setShowSubcategories] = useState(false);
+  const subcategoriesRef = useRef(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [activeIndex, setActiveIndex] = useState(null);
+  const [isExiting, setIsExiting] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
+  const [passDisplay, setPassDisplay] = useState('categories')
 
   const toggleCollapse = () => {
     setCollapsed(!isCollapsed);
-  }
+  };
+
+  const toggleSubcategories = () => {
+    setShowSubcategories(!showSubcategories);
+  };
+
+  const toggleDisplayMode = () => {
+    setPassDisplay(prevMode => (prevMode === 'categories' ? 'showall' : 'categories'));
+  };
+
+  useEffect(() => {
+    if (subcategoriesRef.current) {
+      if (showSubcategories) {
+        subcategoriesRef.current.style.maxHeight = `${subcategoriesRef.current.scrollHeight}px`;
+      } else {
+        subcategoriesRef.current.style.maxHeight = '0px';
+      }
+    }
+  }, [showSubcategories]);
+
+  const copyClipboard = (text) => {
+    navigator.clipboard.writeText(text).then(function() {
+    }).catch(function(error) {
+      console.error("Error copying text: ", error);
+    });
+  };
+
+  const toggleSmallPass = (index) => {
+    if (activeIndex === index) {
+      setIsExiting(true);
+      setTimeout(() => {
+        setActiveIndex(null);
+        setIsExiting(false);
+        setShowDetails(false);
+      }, 350); // match this duration to the CSS animation duration
+    } else {
+      setActiveIndex(index);
+      setShowDetails(true);
+    }
+  };
+
+  const date_changed = "06/17/2024";
+  const date_added = "06/01/2024";
 
   return (
     <div className="home-page">
@@ -21,28 +70,127 @@ const HomePage = ({managed_apps}) => {
         {/* Add your sidebar content here */}
         <nav>
           <ul>
-            <li><a href="#section1">Section 1</a></li>
-            <li><a href="#section2">Section 2</a></li>
-            <li><a href="#section3">Section 3</a></li>
+            <li><a href="#section1">Dashboard</a></li>
+            <li>
+              <a href="#section2" onClick={toggleSubcategories}>Categories</a>
+              <ul
+                className={`subcategories ${showSubcategories ? 'open' : ''}`}
+                ref={subcategoriesRef}
+                style={{marginTop:'5px'}}
+              >
+                <li className='sidebar-item'><a href='personal-passwords'>Personal</a></li>
+                <li className='sidebar-item'><a href='professional-passwords'>Professional</a></li>
+                <li className='sidebar-item'><a href='financial-passwords'>Financial</a></li>
+                <li className='sidebar-item'><a href='entertainment-passwords'>Entertainment</a></li>
+                <li className='sidebar-item'><a href='travel-passwords'>Travel</a></li>
+                <li className='sidebar-item'><a href='education-passwords'>Education</a></li>
+                <li className='sidebar-item'><a href='security-passwords'>Security</a></li>
+                <li className='sidebar-item'><a href='miscellaneous-passwords'>Miscellaneous</a></li>
+              </ul>
+            </li>
+            <li><a href="#section3">New Entry</a></li>
+            <li><a href="#section4">Help</a></li>
           </ul>
         </nav>
       </div>
       <div className="content">
-        <h1 style={{backgroundColor: 'red'}}>Welcome back to klucz AI!</h1>
-        <div className='dashboard'>hi</div>
-        {/* Add your main content here */}
-        <div className='big-password-container'>
-          {managed_apps.map((app, index) => (
-            <div className="small-password-container" key={index}>
-              {/* Add content related to each app */}
-              {app}
+        <div className='dashboard'>
+          <div className='dashboard-title'>
+            DASHBOARD
+          </div>
+          <div className='dash-row1'>
+            <div className='dashboard-health'>
+            HEALTH
             </div>
-          ))} 
+            <div className='dashboard-analytics'>
+            ANALYTICS
+            </div>
+            <div className='dashboard-recent'>
+              RECENT LOGINS
+            </div>
+          </div>
         </div>
+
+        <div className='password-search'>
+          <input
+            type="text"
+            placeholder="Search passwords..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="search-input"
+          />
+        </div>
+
+        <div className='big-password-container'>
+          <div className='category-title'>Personal</div>
+
+          {managed_apps_keys.map((app, index) => (
+            <div style={{width:'100%', alignItems:'center', justifyContent:'center', display:'flex', flexDirection:'column'}} key={index}>
+              <div className={`small-password-container ${showDetails && (activeIndex === index - 1)? 'expanded' : ''}`} onClick={() => toggleSmallPass(index)}>
+                <div className="password-row">
+                  <input 
+                    type="checkbox" 
+                    className="select-box"
+                  />
+                  <span className="star-box">★</span>
+                  <span className="delete-box">🗑️</span>
+                  {/* <img src={`/path/to/logo/${app}.png`} alt={`${app} logo`} className="app-logo"/> */}
+                  <span className="app-name">{app}</span>
+                  <span className="username">user/email: <b>nickk@gmail.com</b></span>
+                  <span className='password-last-changed'>Last Changed: {date_changed}</span>
+                  <span className='password-added-date'>Added: {date_added}</span>
+                </div>
+              </div>
+              {showDetails && activeIndex === index && (
+                <div
+                  className={`password-details ${isExiting ? 'password-details-exit' : 'password-details-enter'}`}
+                >
+                  <div style= {{paddingLeft:'25%'}}>Password: ******</div>
+                  <div style={{display: 'flex', marginLeft: 'auto'}}>
+                    <button >Show</button>
+                    <button>Edit</button>
+                    <button>Copy</button>
+                  </div>
+                  
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        <div className='big-password-container'>
+          <div className='category-title'>Professional</div>
+        </div>
+        
+
+
+        <div className='big-password-container'>
+          <div className='category-title'>Financial</div>
+        </div>
+
+        <div className='big-password-container'>
+          <div className='category-title'>Entertainment</div>
+        </div>
+
+        <div className='big-password-container'>
+          <div className='category-title'>Travel</div>
+        </div>
+
+        <div className='big-password-container'>
+          <div className='category-title'>Education</div>
+        </div>
+
+        <div className='big-password-container'>
+          <div className='category-title'>Security</div>
+        </div>
+
+        <div className='big-password-container'>
+          <div className='category-title'>Miscellaneous</div>
+        </div>
+
       </div>
     </div>
   );
 };
-
 
 export default HomePage;

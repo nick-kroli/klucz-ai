@@ -43,7 +43,7 @@ const HomeContainer = () => {
   // const managed_apps_list = ['app1', 'app2', 'app3', 'app4', 'app5', 'app6', 'app7', 'app8'];
 
 
-  return <HomePage managed_apps={Object.keys(appsMap)}/>;
+  return <HomePage managed_apps_keys={Object.keys(appsMap)} managed_apps_vals={Object.values(appsMap)}/>;
 };
 
 //NEXT TASK: BIG CONTAINER EXPANDS WITH NUMBER OF APPS
