@@ -27,7 +27,7 @@ const LoginPage = ({ onLogin, onCreateAccount, errorMess }) => {
     <div className="login-page">
       <h2>Login</h2>
       <form>
-        <div className="form-group">
+        <div className="">
           <label htmlFor="username">Username:</label>
           <input
             type="text"
@@ -37,7 +37,7 @@ const LoginPage = ({ onLogin, onCreateAccount, errorMess }) => {
             required
           />
         </div>
-        <div className="form-group">
+        <div className="">
           <label htmlFor="password">Password:</label>
           <input
             type="password"
@@ -47,7 +47,7 @@ const LoginPage = ({ onLogin, onCreateAccount, errorMess }) => {
             required
           />
         </div>
-        <div className="form-actions">
+        <div className="">
           <button type="button" onClick={handleLogin}>Login</button>
           <button type="button" onClick={handleCreateAccountClick}>Create Account</button>
         </div>

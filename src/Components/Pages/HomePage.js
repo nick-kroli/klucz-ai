@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Sidebar from './Sidebar';
 import './HomePage.css';
+import AddPasswordPopup from './AddPasswordPopup';
 
 const HomePage = ({ managed_apps_keys, managed_apps_vals }) => {
   const [isCollapsed, setCollapsed] = useState(true);
@@ -13,7 +14,8 @@ const HomePage = ({ managed_apps_keys, managed_apps_vals }) => {
   const [activeIndex, setActiveIndex] = useState(null);
   const [isExiting, setIsExiting] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
-  const [passDisplay, setPassDisplay] = useState('categories')
+  const [passDisplay, setPassDisplay] = useState('categories');
+  const [isEntryPop, setIsEntryPop] = useState(false);
 
   const toggleCollapse = () => {
     setCollapsed(!isCollapsed);
@@ -26,6 +28,19 @@ const HomePage = ({ managed_apps_keys, managed_apps_vals }) => {
   const toggleDisplayMode = () => {
     setPassDisplay(prevMode => (prevMode === 'categories' ? 'showall' : 'categories'));
   };
+
+  const toggleEntryPop1 = () => {
+    setIsEntryPop(!isEntryPop);
+    console.log("Pop up: ", isEntryPop);
+  }
+
+  const handlePassSubmit = (formData) => {
+    // Handle form data submission
+    console.log('Form submitted:', formData);
+    toggleEntryPop1(); // Close the pop-up after submission
+  };
+
+  
 
   useEffect(() => {
     if (subcategoriesRef.current) {
@@ -88,30 +103,24 @@ const HomePage = ({ managed_apps_keys, managed_apps_vals }) => {
                 <li className='sidebar-item'><a href='miscellaneous-passwords'>Miscellaneous</a></li>
               </ul>
             </li>
-            <li><a href="#section3">New Entry</a></li>
+            <li><a href="#section3" onClick={toggleEntryPop1}>New Entry</a></li>
             <li><a href="#section4">Help</a></li>
           </ul>
         </nav>
       </div>
       <div className="content">
         <div className='dashboard'>
-          <div className='dashboard-title'>
-            DASHBOARD
-          </div>
-          <div className='dash-row1'>
-            <div className='dashboard-health'>
-            HEALTH
-            </div>
-            <div className='dashboard-analytics'>
-            ANALYTICS
-            </div>
-            <div className='dashboard-recent'>
-              RECENT LOGINS
-            </div>
-          </div>
+          
         </div>
 
+        {isEntryPop && (
+          <AddPasswordPopup onClose={toggleEntryPop1} onSubmit={handlePassSubmit} />
+        )}
+
         <div className='password-search'>
+          <div>
+            <button onClick={toggleEntryPop1}>New Password</button>
+          </div>
           <input
             type="text"
             placeholder="Search passwords..."
@@ -119,8 +128,21 @@ const HomePage = ({ managed_apps_keys, managed_apps_vals }) => {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="search-input"
           />
+
+          <div class="toggle-switch">
+            <input type="checkbox" id="toggle" class="toggle-input"/>
+            <label npm for="toggle" class="toggle-label">
+              <span class="toggle-text">Categories</span>
+              <span class="toggle-text">Show All</span>
+              <div class="toggle-handle"></div>
+            </label>
+          </div>
         </div>
 
+        
+
+
+        
         <div className='big-password-container'>
           <div className='category-title'>Personal</div>
 
