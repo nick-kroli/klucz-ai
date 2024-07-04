@@ -9,6 +9,7 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 const jwt = require('jsonwebtoken');
+const CryptoJS = require('crypto-js');
 
 const PORT = process.env.PORT || 3001;
 const { CognitoUserPool, CognitoUser, AuthenticationDetails, CognitoUserAttribute } = require('amazon-cognito-identity-js');
@@ -209,9 +210,6 @@ app.post('/api/add-first-managed', (req, res) => {
   console.log("Adding the following apps: ", selectedApps, "for user: ", username);
 });
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
 
 
 
@@ -228,9 +226,9 @@ app.post('/api/get-password-info', async (req, res) => {
   const username = decoded.username;
 
   const params = {
-    TableName: 'klucz-ai-passwordTestTable', // Replace with your table name
+    TableName: 'klucz-ai-passwordTestTable', 
     Key: {
-      username: username, // Partition key
+      username: username, 
     }
   };
 
@@ -243,5 +241,58 @@ app.post('/api/get-password-info', async (req, res) => {
     console.log(err);
   }
 
+});
+
+
+app.post('/api/add-new-password', async (req, res) => {
+  const { application, app_user, encryptedPass } = req.body;
+  console.log(req.body);
+  console.log("ENC", encryptedPass);
+  console.log()
+  const token = req.headers.authorization?.split(' ')[1];
+
+
+  if (!token) {
+    return res.status(401).json({ message: 'No token provided' });
+  }
+  try {
+    const decoded = jwt.verify(token, SECRET_KEY);
+    const username = decoded.username;
+
+    const updateParams = {
+      TableName: 'klucz-ai-passwordTestTable',
+      Key: {
+        username: username,
+      },
+      UpdateExpression: 'SET #managedApps[0].#appName = :encryptedPass',
+      ExpressionAttributeNames: {
+        '#managedApps': 'managed-apps',
+        '#appName': application,
+      },
+      ExpressionAttributeValues: {
+        ':encryptedPass': encryptedPass,
+      },
+      ReturnValues: 'UPDATED_NEW',
+    };
+
+    await dynamoDb.update(updateParams).promise();
+    res.status(200).json({ message: 'New application password added successfully' });
+
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: 'Internal server error, error adding app to list' });
+  }
+});
+
+// app.post('/api/delete-password')
+
+
+
+app.listen(3000, () => {
+  console.log('Server running on port 3000');
+});
+
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
 

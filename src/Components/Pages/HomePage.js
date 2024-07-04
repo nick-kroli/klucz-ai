@@ -3,7 +3,8 @@ import Sidebar from './Sidebar';
 import './HomePage.css';
 import AddPasswordPopup from './AddPasswordPopup';
 
-const HomePage = ({ managed_apps_keys, managed_apps_vals }) => {
+
+const HomePage = ({ managed_apps_keys, managed_apps_vals, onPassSubmit}) => {
   const [isCollapsed, setCollapsed] = useState(true);
   const [passwordVisibility, setPasswordVisibility] = useState(
     Array(managed_apps_keys.length).fill(false)
@@ -35,9 +36,10 @@ const HomePage = ({ managed_apps_keys, managed_apps_vals }) => {
   }
 
   const handlePassSubmit = (formData) => {
-    // Handle form data submission
+    // Handle form data 
     console.log('Form submitted:', formData);
     toggleEntryPop1(); // Close the pop-up after submission
+    onPassSubmit(formData);
   };
 
   

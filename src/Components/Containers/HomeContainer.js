@@ -42,8 +42,27 @@ const HomeContainer = () => {
   }, []);
   // const managed_apps_list = ['app1', 'app2', 'app3', 'app4', 'app5', 'app6', 'app7', 'app8'];
 
+  const handlePassSubmit = async (formData) => {
+    try{
+      const token = localStorage.getItem('token');
+      // console.log("token", token);
+      const application = Object.values(formData)[0];
+      const app_user = Object.values(formData)[1];
+      const encryptedPass = Object.values(formData)[2];
+      const response = await axios.post('http://localhost:3001/api/add-new-password', {application, app_user, encryptedPass}, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      // console.log("RESPONSE", response.data[0]);
+      return response.data
+      
+    }catch (err){
+      console.log("Error submitting passwords", err);
+    }
+  }
 
-  return <HomePage managed_apps_keys={Object.keys(appsMap)} managed_apps_vals={Object.values(appsMap)}/>;
+  return <HomePage managed_apps_keys={Object.keys(appsMap)} managed_apps_vals={Object.values(appsMap)} onPassSubmit={handlePassSubmit}/>;
 };
 
 //NEXT TASK: BIG CONTAINER EXPANDS WITH NUMBER OF APPS
