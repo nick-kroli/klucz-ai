@@ -62,7 +62,20 @@ const HomeContainer = () => {
     }
   }
 
-  return <HomePage managed_apps_keys={Object.keys(appsMap)} managed_apps_vals={Object.values(appsMap)} onPassSubmit={handlePassSubmit}/>;
+  const handlePassDelete = async (application) => {
+    try{
+      const token = localStorage.getItem('token');
+      await axios.post('http://localhost:3001/api/delete-password', {application}, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+    }catch (err){
+      console.log("Error deleting password");
+    }
+  }
+
+  return <HomePage managed_apps_keys={Object.keys(appsMap)} managed_apps_vals={Object.values(appsMap)} onPassSubmit={handlePassSubmit} onPassDelete={handlePassDelete}/>;
 };
 
 //NEXT TASK: BIG CONTAINER EXPANDS WITH NUMBER OF APPS

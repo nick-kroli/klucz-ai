@@ -246,9 +246,9 @@ app.post('/api/get-password-info', async (req, res) => {
 
 app.post('/api/add-new-password', async (req, res) => {
   const { application, app_user, encryptedPass } = req.body;
-  console.log(req.body);
-  console.log("ENC", encryptedPass);
-  console.log()
+  // console.log(req.body);
+  // console.log("ENC", encryptedPass);
+  // console.log()
   const token = req.headers.authorization?.split(' ')[1];
 
 
@@ -284,7 +284,42 @@ app.post('/api/add-new-password', async (req, res) => {
   }
 });
 
-// app.post('/api/delete-password')
+app.post('/api/delete-password', async (req, res) => {
+  const {application} = req.body;
+
+  const token = req.headers.authorization?.split(' ')[1];
+
+  if (!token) {
+    return res.status(401).json({ message: 'No token provided' });
+  }
+
+  try {
+
+    const decoded = jwt.verify(token, SECRET_KEY);
+    const username = decoded.username;
+
+    const updateParams = {
+      TableName: 'klucz-ai-passwordTestTable',
+      Key: {
+        username: username,
+      },
+      UpdateExpression: 'REMOVE #managedApps[0].#appName',
+      ExpressionAttributeNames: {
+        '#managedApps': 'managed-apps',
+        '#appName': application,
+      },
+      ReturnValues: 'UPDATED_NEW',
+    };
+    
+    await dynamoDb.update(updateParams).promise();
+    res.status(200).json({ message: 'Application password deleted successfully' });
+
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: 'Internal server error, error adding app to list' });
+  }
+
+});
 
 
 

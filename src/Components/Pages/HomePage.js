@@ -4,7 +4,7 @@ import './HomePage.css';
 import AddPasswordPopup from './AddPasswordPopup';
 
 
-const HomePage = ({ managed_apps_keys, managed_apps_vals, onPassSubmit}) => {
+const HomePage = ({ managed_apps_keys, managed_apps_vals, onPassSubmit, onPassDelete}) => {
   const [isCollapsed, setCollapsed] = useState(true);
   const [passwordVisibility, setPasswordVisibility] = useState(
     Array(managed_apps_keys.length).fill(false)
@@ -41,6 +41,11 @@ const HomePage = ({ managed_apps_keys, managed_apps_vals, onPassSubmit}) => {
     toggleEntryPop1(); // Close the pop-up after submission
     onPassSubmit(formData);
   };
+
+  const handlePassDelete = (app) => {
+    console.log("Deleting password....", app);
+    onPassDelete(app);
+  }
 
   
 
@@ -157,7 +162,10 @@ const HomePage = ({ managed_apps_keys, managed_apps_vals, onPassSubmit}) => {
                     className="select-box"
                   />
                   <span className="star-box">★</span>
-                  <span className="delete-box">🗑️</span>
+                  <span className="delete-box" onClick={(e) => {
+                    e.stopPropagation();
+                    handlePassDelete(app)
+                  }}>🗑️</span>
                   {/* <img src={`/path/to/logo/${app}.png`} alt={`${app} logo`} className="app-logo"/> */}
                   <span className="app-name">{app}</span>
                   <span className="username">user/email: <b>nickk@gmail.com</b></span>
@@ -175,7 +183,7 @@ const HomePage = ({ managed_apps_keys, managed_apps_vals, onPassSubmit}) => {
                     <button>Edit</button>
                     <button>Copy</button>
                   </div>
-                  
+
                 </div>
               )}
             </div>
