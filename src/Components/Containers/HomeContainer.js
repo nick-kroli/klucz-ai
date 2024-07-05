@@ -54,6 +54,11 @@ const HomeContainer = () => {
           'Authorization': `Bearer ${token}`
         }
       });
+
+      setAppsMap(prevState => ({
+        ...prevState,
+        [application]: { app_user, encryptedPass }
+      }));
       // console.log("RESPONSE", response.data[0]);
       return response.data
       
@@ -70,13 +75,20 @@ const HomeContainer = () => {
           'Authorization': `Bearer ${token}`
         }
       });
+
+      setAppsMap(prevState => {
+        const newState = { ...prevState };
+        delete newState[application];
+        return newState;
+      });
+
     }catch (err){
-      console.log("Error deleting password");
+      console.log("Error deleting password: ", err);
     }
   }
 
   return <HomePage managed_apps_keys={Object.keys(appsMap)} managed_apps_vals={Object.values(appsMap)} onPassSubmit={handlePassSubmit} onPassDelete={handlePassDelete}/>;
 };
 
-//NEXT TASK: BIG CONTAINER EXPANDS WITH NUMBER OF APPS
+//NEXT TASK: BIG CONTAINER EXPANDS WITH NUMBER OF APP... STILL NOT DONE
 export default HomeContainer;

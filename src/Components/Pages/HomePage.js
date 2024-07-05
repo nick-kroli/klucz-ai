@@ -2,13 +2,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import Sidebar from './Sidebar';
 import './HomePage.css';
 import AddPasswordPopup from './AddPasswordPopup';
-
+import DeletePopup from './DeletePopup';
 
 const HomePage = ({ managed_apps_keys, managed_apps_vals, onPassSubmit, onPassDelete}) => {
   const [isCollapsed, setCollapsed] = useState(true);
   const [passwordVisibility, setPasswordVisibility] = useState(
     Array(managed_apps_keys.length).fill(false)
   );
+  console.log("keys length: ",managed_apps_keys.length);
   const [showSubcategories, setShowSubcategories] = useState(false);
   const subcategoriesRef = useRef(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -17,6 +18,8 @@ const HomePage = ({ managed_apps_keys, managed_apps_vals, onPassSubmit, onPassDe
   const [showDetails, setShowDetails] = useState(false);
   const [passDisplay, setPassDisplay] = useState('categories');
   const [isEntryPop, setIsEntryPop] = useState(false);
+  const [isDeleteSure, setIsDeleteSure] = useState(false);
+
 
   const toggleCollapse = () => {
     setCollapsed(!isCollapsed);
@@ -35,6 +38,11 @@ const HomePage = ({ managed_apps_keys, managed_apps_vals, onPassSubmit, onPassDe
     console.log("Pop up: ", isEntryPop);
   }
 
+  const toggleDeletePop = () => {
+    setIsDeleteSure(!isDeleteSure);
+    console.log("Pop up: ", isDeleteSure);
+  }
+
   const handlePassSubmit = (formData) => {
     // Handle form data 
     console.log('Form submitted:', formData);
@@ -42,7 +50,9 @@ const HomePage = ({ managed_apps_keys, managed_apps_vals, onPassSubmit, onPassDe
     onPassSubmit(formData);
   };
 
-  const handlePassDelete = (app) => {
+  const handlePassDelete = (app, e) => {
+    e.stopPropagation();
+    toggleDeletePop();
     console.log("Deleting password....", app);
     onPassDelete(app);
   }
@@ -57,7 +67,7 @@ const HomePage = ({ managed_apps_keys, managed_apps_vals, onPassSubmit, onPassDe
         subcategoriesRef.current.style.maxHeight = '0px';
       }
     }
-  }, [showSubcategories]);
+  }, [showSubcategories,managed_apps_keys.length]);
 
   const copyClipboard = (text) => {
     navigator.clipboard.writeText(text).then(function() {
@@ -124,6 +134,7 @@ const HomePage = ({ managed_apps_keys, managed_apps_vals, onPassSubmit, onPassDe
           <AddPasswordPopup onClose={toggleEntryPop1} onSubmit={handlePassSubmit} />
         )}
 
+        
         <div className='password-search'>
           <div>
             <button onClick={toggleEntryPop1}>New Password</button>
@@ -154,7 +165,17 @@ const HomePage = ({ managed_apps_keys, managed_apps_vals, onPassSubmit, onPassDe
           <div className='category-title'>Personal</div>
 
           {managed_apps_keys.map((app, index) => (
+            
+            
+
+
             <div style={{width:'100%', alignItems:'center', justifyContent:'center', display:'flex', flexDirection:'column'}} key={index}>
+              
+              {isDeleteSure && (
+                <DeletePopup onClose={toggleDeletePop} onSubmit={(e) => handlePassDelete(app, e)} />
+              )}
+
+              
               <div className={`small-password-container ${showDetails && (activeIndex === index - 1)? 'expanded' : ''}`} onClick={() => toggleSmallPass(index)}>
                 <div className="password-row">
                   <input 
@@ -164,7 +185,7 @@ const HomePage = ({ managed_apps_keys, managed_apps_vals, onPassSubmit, onPassDe
                   <span className="star-box">★</span>
                   <span className="delete-box" onClick={(e) => {
                     e.stopPropagation();
-                    handlePassDelete(app)
+                    toggleDeletePop();
                   }}>🗑️</span>
                   {/* <img src={`/path/to/logo/${app}.png`} alt={`${app} logo`} className="app-logo"/> */}
                   <span className="app-name">{app}</span>
