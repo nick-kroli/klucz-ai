@@ -87,8 +87,14 @@ const HomeContainer = () => {
     }
   }
 
-  return <HomePage managed_apps_keys={Object.keys(appsMap)} managed_apps_vals={Object.values(appsMap)} onPassSubmit={handlePassSubmit} onPassDelete={handlePassDelete}/>;
+  const handlePassRetrieve = async (application) => {
+    console.log("Retrieving password for: ", application);
+    return(appsMap[application])
+    
+  }
+
+  return <HomePage managed_apps={appsMap} onPassSubmit={handlePassSubmit} onPassDelete={handlePassDelete}/>;
 };
 
-//NEXT TASK: BIG CONTAINER EXPANDS WITH NUMBER OF APP... STILL NOT DONE
+//NEXT TASK: BIG CONTAINER EXPANDS WITH NUMBER OF APP... STILL NOT DONE!!!!!!!!!!
 export default HomeContainer;

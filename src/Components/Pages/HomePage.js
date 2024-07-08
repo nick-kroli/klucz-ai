@@ -3,13 +3,20 @@ import Sidebar from './Sidebar';
 import './HomePage.css';
 import AddPasswordPopup from './AddPasswordPopup';
 import DeletePopup from './DeletePopup';
+import applications from '../Containers/applications';
 
-const HomePage = ({ managed_apps_keys, managed_apps_vals, onPassSubmit, onPassDelete}) => {
+
+const HomePage = ({ managed_apps , onPassSubmit, onPassDelete}) => {
+  const managed_apps_keys = Object.keys(managed_apps);
   const [isCollapsed, setCollapsed] = useState(true);
-  const [passwordVisibility, setPasswordVisibility] = useState(
-    Array(managed_apps_keys.length).fill(false)
-  );
-  console.log("keys length: ",managed_apps_keys.length);
+  // const [passwordVisibility, setPasswordVisibility] = useState(
+  //   Array(managed_apps_keys.length).fill(false)
+  // );
+
+  
+  // console.log("keys length: ",managed_apps_keys.length);
+
+
   const [showSubcategories, setShowSubcategories] = useState(false);
   const subcategoriesRef = useRef(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -19,6 +26,8 @@ const HomePage = ({ managed_apps_keys, managed_apps_vals, onPassSubmit, onPassDe
   const [passDisplay, setPassDisplay] = useState('categories');
   const [isEntryPop, setIsEntryPop] = useState(false);
   const [isDeleteSure, setIsDeleteSure] = useState(false);
+  const [showPass, setShowPass] = useState(false);
+  const [currentPass, setCurrentPass] = useState("");
 
 
   const toggleCollapse = () => {
@@ -57,7 +66,13 @@ const HomePage = ({ managed_apps_keys, managed_apps_vals, onPassSubmit, onPassDe
     onPassDelete(app);
   }
 
+  const handlePassRetrieve = (app) => {
+    setCurrentPass(managed_apps[app]);
+  }
   
+  const toggleShowPass = () => {
+    setShowPass(!showPass);
+  }
 
   useEffect(() => {
     if (subcategoriesRef.current) {
@@ -77,7 +92,9 @@ const HomePage = ({ managed_apps_keys, managed_apps_vals, onPassSubmit, onPassDe
   };
 
   const toggleSmallPass = (index) => {
+    setShowPass(false)
     if (activeIndex === index) {
+      console.log("LEAVING1");
       setIsExiting(true);
       setTimeout(() => {
         setActiveIndex(null);
@@ -85,10 +102,16 @@ const HomePage = ({ managed_apps_keys, managed_apps_vals, onPassSubmit, onPassDe
         setShowDetails(false);
       }, 350); // match this duration to the CSS animation duration
     } else {
+      // handlePassRetrieve(app);
       setActiveIndex(index);
       setShowDetails(true);
     }
   };
+
+  const SmallPassFuncs = (app, index) => {
+    toggleSmallPass(index);
+    handlePassRetrieve(app)
+  }
 
   const date_changed = "06/17/2024";
   const date_added = "06/01/2024";
@@ -157,18 +180,11 @@ const HomePage = ({ managed_apps_keys, managed_apps_vals, onPassSubmit, onPassDe
           </div>
         </div>
 
-        
-
-
-        
         <div className='big-password-container'>
           <div className='category-title'>Personal</div>
 
           {managed_apps_keys.map((app, index) => (
             
-            
-
-
             <div style={{width:'100%', alignItems:'center', justifyContent:'center', display:'flex', flexDirection:'column'}} key={index}>
               
               {isDeleteSure && (
@@ -176,7 +192,7 @@ const HomePage = ({ managed_apps_keys, managed_apps_vals, onPassSubmit, onPassDe
               )}
 
               
-              <div className={`small-password-container ${showDetails && (activeIndex === index - 1)? 'expanded' : ''}`} onClick={() => toggleSmallPass(index)}>
+              <div className={`small-password-container ${showDetails && (activeIndex === index - 1)? 'expanded' : ''}`} onClick={() => SmallPassFuncs(app, index)}>
                 <div className="password-row">
                   <input 
                     type="checkbox" 
@@ -198,25 +214,23 @@ const HomePage = ({ managed_apps_keys, managed_apps_vals, onPassSubmit, onPassDe
                 <div
                   className={`password-details ${isExiting ? 'password-details-exit' : 'password-details-enter'}`}
                 >
-                  <div style= {{paddingLeft:'25%'}}>Password: ******</div>
+                  <div style= {{paddingLeft:'25%'}}> Password: {showPass ? currentPass : '  ********' }</div>
                   <div style={{display: 'flex', marginLeft: 'auto'}}>
-                    <button >Show</button>
+                    <button onClick={toggleShowPass}>{showPass ? 'Hide' : 'Show'}</button>
                     <button>Edit</button>
                     <button>Copy</button>
                   </div>
-
                 </div>
               )}
             </div>
           ))}
         </div>
 
+        
         <div className='big-password-container'>
           <div className='category-title'>Professional</div>
         </div>
         
-
-
         <div className='big-password-container'>
           <div className='category-title'>Financial</div>
         </div>

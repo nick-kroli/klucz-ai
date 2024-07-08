@@ -235,7 +235,7 @@ app.post('/api/get-password-info', async (req, res) => {
   try{
     const data = await dynamoDb.get(params).promise();
     managed_apps = data.Item['managed-apps'];
-    res.status(200).json(managed_apps)
+    res.status(200).json(managed_apps);
 
   } catch (err){
     console.log(err);
@@ -318,6 +318,16 @@ app.post('/api/delete-password', async (req, res) => {
     console.log(err);
     res.status(500).json({ message: 'Internal server error, error adding app to list' });
   }
+ 
+});
+
+
+app.post('/api/retrieve-password', async (req, res) => {
+  const {application} = req.body;
+  const decoded = jwt.verify(token, SECRET_KEY);
+  const username = decoded.username;
+
+
 
 });
 
