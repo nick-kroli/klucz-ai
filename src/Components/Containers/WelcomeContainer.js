@@ -26,7 +26,7 @@ const WelcomeContainer = () => {
     }
   };
 
-  return <WelcomePage applications={applications} onSubmitClick={handleSubmitClick}/>;
+  return <WelcomePage applications={Object.keys(applications)} onSubmitClick={handleSubmitClick}/>;
 };
 
 
