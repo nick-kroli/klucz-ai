@@ -7,10 +7,28 @@ const AddPasswordPopup = ({onClose, onSubmit}) => {
   const [applicationName, setApplicationName] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [query, setQuery] = useState('');
+  const [suggestions, setSuggestions] = useState([]);
+
+  const handleInputChange = (event) => {
+    const val = event.target.value;
+    setApplicationName(val);
+
+    if (val) {
+      const filteredSuggestions = Object.keys(applications).filter(app => app.toLowerCase().startsWith(val.toLowerCase()));
+      setSuggestions(filteredSuggestions);
+    }else{
+      setSuggestions([]);
+    }
+  }
+
+  const handleSuggestionClick = (app) => {
+    setApplicationName(app);
+    setSuggestions([]);
+  };
 
   const handleSubmit = (event) => {
     // event.preventDefault();
-    
     const encryptedPass = CryptoJS.AES.encrypt(password, 'secret-key').toString();
     const formData = {applicationName, username, password: encryptedPass};
     onSubmit(formData);
@@ -29,10 +47,19 @@ const AddPasswordPopup = ({onClose, onSubmit}) => {
             <input
               type="text"
               value={applicationName}
-              onChange={(e) => setApplicationName(e.target.value)}
+              onChange={handleInputChange}
               placeholder='Search applications...'
               required
             />
+            {suggestions.length > 0 && (
+              <ul className="suggestions-list">
+                {suggestions.map((suggestion, index) => (
+                  <li key={index} onClick={() => handleSuggestionClick(suggestion)} className="suggestion-item">
+                    {suggestion}
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
           <div className="form-group">
             <label>Username</label>
