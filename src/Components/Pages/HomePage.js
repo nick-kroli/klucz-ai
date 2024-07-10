@@ -4,6 +4,7 @@ import './HomePage.css';
 import AddPasswordPopup from './AddPasswordPopup';
 import DeletePopup from './DeletePopup';
 import applications from '../Containers/applications';
+import { act } from 'react';
 
 
 const HomePage = ({ managed_apps , onPassSubmit, onPassDelete}) => {
@@ -21,6 +22,7 @@ const HomePage = ({ managed_apps , onPassSubmit, onPassDelete}) => {
   const subcategoriesRef = useRef(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeIndex, setActiveIndex] = useState(null);
+  const [activeCategory, setActiveCategory] = useState(null);
   const [isExiting, setIsExiting] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const [passDisplay, setPassDisplay] = useState('categories');
@@ -91,30 +93,77 @@ const HomePage = ({ managed_apps , onPassSubmit, onPassDelete}) => {
     });
   };
 
-  const toggleSmallPass = (index) => {
+  const toggleSmallPass = (index, category) => {
     setShowPass(false)
-    if (activeIndex === index) {
-      console.log("LEAVING1");
+    if (activeCategory === category && activeIndex === index) {
+      // console.log("LEAVING1");
       setIsExiting(true);
       setTimeout(() => {
+        setActiveCategory(null);
         setActiveIndex(null);
         setIsExiting(false);
         setShowDetails(false);
       }, 350); // match this duration to the CSS animation duration
     } else {
       // handlePassRetrieve(app);
+      setActiveCategory(category);
       setActiveIndex(index);
       setShowDetails(true);
     }
   };
 
-  const SmallPassFuncs = (app, index) => {
-    toggleSmallPass(index);
+  const SmallPassFuncs = (app, index, category) => {
+
+    toggleSmallPass(index, category);
     handlePassRetrieve(app)
   }
 
+  const categorizeApps = (apps, appCategories) => {
+    const categorized = {};
+    // console.log("APPS LIST: " , apps)
+    for(let appName = 0; appName < apps.length; appName++){
+      var category = "";
+      // console.log("trying to obtain category with name: ", apps[appName], "and gets: ", appCategories[apps[appName]]);
+      if(appCategories[apps[appName]]){
+        console.log("hits: ", apps[appName]);
+        category = appCategories[apps[appName]];
+      } else {
+        category = "Miscellaneous";
+      }
+      if(!categorized[category]){
+        categorized[category] = []
+      }
+      try {
+        // console.log("pushing: ", apps[appName]);
+        categorized[category].push(apps[appName])
+        // console.log(categorized[category]);
+      } catch (err){
+        console.log(err);
+      }
+    }
+    
+    // Object.entries(apps).forEach(appName => {
+    //   var category = ""
+    //   if(appCategories[appName]){
+    //     category = appCategories[appName];
+    //   } else{
+    //     category = 'Miscellaneous';
+    //   }
+      
+    //   if(!categorized[category]){
+    //     categorized[category] = [];
+    //   }
+    //   categorized[category].push(appName);
+      
+    // });
+    return categorized;
+  };
+
   const date_changed = "06/17/2024";
   const date_added = "06/01/2024";
+  const categorizedApps = categorizeApps(Object.keys(managed_apps), applications);
+  // console.log(categorizedApps);
+
 
   return (
     <div className="home-page">
@@ -180,9 +229,59 @@ const HomePage = ({ managed_apps , onPassSubmit, onPassDelete}) => {
           </div>
         </div>
 
-        <div className='big-password-container'>
-          <div className='category-title'>Personal</div>
 
+        {Object.keys(categorizedApps).map((category) => (
+          <div className='big-password-container' key={category}>
+            <div className='category-title'>{category}</div>
+            {categorizedApps[category].map((app, index) => (
+              <div 
+                style={{width:'100%', alignItems:'center', justifyContent:'center', display:'flex', flexDirection:'column'}} 
+                key={index}
+              >
+                {isDeleteSure && (
+                  <DeletePopup onClose={toggleDeletePop} onSubmit={(e) => handlePassDelete(app, e)} />
+                )}
+                <div 
+                  className={`small-password-container ${showDetails && (activeCategory === category && activeIndex === index - 1)? 'expanded' : ''}`} 
+                  onClick={() => SmallPassFuncs(app, index, category)}
+                >
+                  <div className="password-row">
+                    <input 
+                      type="checkbox" 
+                      className="select-box"
+                    />
+                    <span className="star-box">★</span>
+                    <span className="delete-box" onClick={(e) => {
+                      e.stopPropagation();
+                      toggleDeletePop();
+                    }}>🗑️</span>
+                    <span className="app-name">{app}</span>
+                    <span className="username">user/email: <b>nickk@gmail.com</b></span>
+                    <span className='password-last-changed'>Last Changed: 06/17/2024</span>
+                    <span className='password-added-date'>Added: 06/01/2024</span>
+                  </div>
+                </div>
+                {showDetails && activeCategory === category && activeIndex === index && (
+                  <div
+                    className={`password-details ${isExiting ? 'password-details-exit' : 'password-details-enter'}`}
+                  >
+                    <div style={{paddingLeft:'25%'}}> Password: {showPass ? currentPass : '  ********'}</div>
+                    <div style={{display: 'flex', marginLeft: 'auto'}}>
+                      <button onClick={toggleShowPass}>{showPass ? 'Hide' : 'Show'}</button>
+                      <button>Edit</button>
+                      <button onClick={() => copyClipboard(currentPass)}>Copy</button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        ))}
+
+        
+        
+        {/* <div className='big-password-container'>
+          <div className='category-title'>Personal</div>
           {managed_apps_keys.map((app, index) => (
             
             <div style={{width:'100%', alignItems:'center', justifyContent:'center', display:'flex', flexDirection:'column'}} key={index}>
@@ -203,7 +302,6 @@ const HomePage = ({ managed_apps , onPassSubmit, onPassDelete}) => {
                     e.stopPropagation();
                     toggleDeletePop();
                   }}>🗑️</span>
-                  {/* <img src={`/path/to/logo/${app}.png`} alt={`${app} logo`} className="app-logo"/> */}
                   <span className="app-name">{app}</span>
                   <span className="username">user/email: <b>nickk@gmail.com</b></span>
                   <span className='password-last-changed'>Last Changed: {date_changed}</span>
@@ -224,10 +322,10 @@ const HomePage = ({ managed_apps , onPassSubmit, onPassDelete}) => {
               )}
             </div>
           ))}
-        </div>
+        </div> */}
 
         
-        <div className='big-password-container'>
+        {/* <div className='big-password-container'>
           <div className='category-title'>Professional</div>
         </div>
         
@@ -253,7 +351,7 @@ const HomePage = ({ managed_apps , onPassSubmit, onPassDelete}) => {
 
         <div className='big-password-container'>
           <div className='category-title'>Miscellaneous</div>
-        </div>
+        </div> */}
 
       </div>
     </div>

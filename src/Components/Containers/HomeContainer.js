@@ -31,7 +31,7 @@ const HomeContainer = () => {
     getAppsList().then(result => {
       // Access result here
   
-      console.log("RES", result[0]);
+      // console.log("RES", result[0]);
       setAppsMap(result[0]);
     }).catch(error => {
       // Handle error here

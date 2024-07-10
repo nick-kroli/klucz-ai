@@ -1,5 +1,3 @@
-
-
 const applications = {
   // Personal Accounts
   'Facebook': 'Personal Accounts',
@@ -57,35 +55,6 @@ const applications = {
   'Experian': 'Personal Accounts',
   'TransUnion': 'Personal Accounts',
   'Equifax': 'Personal Accounts',
-  'Duolingo': 'Personal Accounts',
-  'Rosetta Stone': 'Personal Accounts',
-  'Babbel': 'Personal Accounts',
-  'Memrise': 'Personal Accounts',
-  'Busuu': 'Personal Accounts',
-  'HelloTalk': 'Personal Accounts',
-  'Tandem': 'Personal Accounts',
-  'Coursera': 'Personal Accounts',
-  'Udemy': 'Personal Accounts',
-  'edX': 'Personal Accounts',
-  'Khan Academy': 'Personal Accounts',
-  'Skillshare': 'Personal Accounts',
-  'MasterClass': 'Personal Accounts',
-  'LinkedIn Learning': 'Personal Accounts',
-  'Codecademy': 'Personal Accounts',
-  'Pluralsight': 'Personal Accounts',
-  'Udacity': 'Personal Accounts',
-  'DataCamp': 'Personal Accounts',
-  'Brilliant': 'Personal Accounts',
-  'CliffsNotes': 'Personal Accounts',
-  'SparkNotes': 'Personal Accounts',
-  'Quizlet': 'Personal Accounts',
-  'Anki': 'Personal Accounts',
-  'Chegg': 'Personal Accounts',
-  'Kahoot!': 'Personal Accounts',
-  'Socrative': 'Personal Accounts',
-  'ClassDojo': 'Personal Accounts',
-  'Remind': 'Personal Accounts',
-  'Google Classroom': 'Personal Accounts',
   'Shazam': 'Personal Accounts',
   'SoundHound': 'Personal Accounts',
   'TuneIn Radio': 'Personal Accounts',
@@ -295,7 +264,30 @@ const applications = {
   'StubHub': 'Entertainment',
   'Eventbrite': 'Entertainment',
   'Meetup': 'Entertainment',
-};
 
+  // Education
+  'Coursera': 'Education',
+  'Udemy': 'Education',
+  'edX': 'Education',
+  'Khan Academy': 'Education',
+  'Skillshare': 'Education',
+  'MasterClass': 'Education',
+  'LinkedIn Learning': 'Education',
+  'Codecademy': 'Education',
+  'Pluralsight': 'Education',
+  'Udacity': 'Education',
+  'DataCamp': 'Education',
+  'Brilliant': 'Education',
+  'CliffsNotes': 'Education',
+  'SparkNotes': 'Education',
+  'Quizlet': 'Education',
+  'Anki': 'Education',
+  'Chegg': 'Education',
+  'Kahoot!': 'Education',
+  'Socrative': 'Education',
+  'ClassDojo': 'Education',
+  'Remind': 'Education',
+  'Google Classroom': 'Education'
+};
 
 export default applications;
