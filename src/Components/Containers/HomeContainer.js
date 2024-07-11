@@ -96,5 +96,5 @@ const HomeContainer = () => {
   return <HomePage managed_apps={appsMap} onPassSubmit={handlePassSubmit} onPassDelete={handlePassDelete}/>;
 };
 
-//NEXT TASK: BIG CONTAINER EXPANDS WITH NUMBER OF APP... STILL NOT DONE!!!!!!!!!!
+//NEXT TASK: BIG CONTAINER EXPANDS WITH NUMBER OF APP... kinda done now. needs tweaking
 export default HomeContainer;

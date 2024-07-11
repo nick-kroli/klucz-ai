@@ -244,6 +244,47 @@ app.post('/api/get-password-info', async (req, res) => {
 });
 
 
+// app.post('/api/add-new-password', async (req, res) => {
+//   const { application, app_user, encryptedPass } = req.body;
+//   // console.log(req.body);
+//   // console.log("ENC", encryptedPass);
+//   // console.log()
+//   const token = req.headers.authorization?.split(' ')[1];
+
+
+//   if (!token) {
+//     return res.status(401).json({ message: 'No token provided' });
+//   }
+//   try {
+//     const decoded = jwt.verify(token, SECRET_KEY);
+//     const username = decoded.username;
+
+//     const updateParams = {
+//       TableName: 'klucz-ai-passwordTestTable',
+//       Key: {
+//         username: username,
+//       },
+//       UpdateExpression: 'SET #managedApps[0].#appName = :encryptedPass',
+//       ExpressionAttributeNames: {
+//         '#managedApps': 'managed-apps',
+//         '#appName': application,
+//       },
+//       ExpressionAttributeValues: {
+//         ':encryptedPass': encryptedPass,
+//       },
+//       ReturnValues: 'UPDATED_NEW',
+//     };
+
+//     await dynamoDb.update(updateParams).promise();
+//     res.status(200).json({ message: 'New application password added successfully' });
+
+//   } catch (err) {
+//     console.log(err);
+//     res.status(500).json({ message: 'Internal server error, error adding app to list' });
+//   }
+// });
+
+
 app.post('/api/add-new-password', async (req, res) => {
   const { application, app_user, encryptedPass } = req.body;
   // console.log(req.body);
@@ -258,6 +299,12 @@ app.post('/api/add-new-password', async (req, res) => {
   try {
     const decoded = jwt.verify(token, SECRET_KEY);
     const username = decoded.username;
+    const today = new Date()
+    let formattedDate = today.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    });
 
     const updateParams = {
       TableName: 'klucz-ai-passwordTestTable',
@@ -283,6 +330,41 @@ app.post('/api/add-new-password', async (req, res) => {
     res.status(500).json({ message: 'Internal server error, error adding app to list' });
   }
 });
+
+// WANT TO CHANGE TO THIS STRUCTURE BELOW TO IMPLEMENT MULTIPLE ACCOUNTS PER APP, USER, AND DATES
+// {
+//   "username": {
+//     "S": "testuser2"
+//   },
+//   "managed-apps": {
+//     "L": [
+//       {
+//         "M": {
+//           "Gmail": [
+//             {
+//               "M": {
+//                 "password": { "S": "U2FsdGVkX1+CANWNsnt2tWHS/YA+fcY7m7oXdKgQ9DY=" },
+//                 "username": { "S": "testuser2" },
+//                 "dateAdded": { "S": "2024-07-10T12:34:56.789Z" },
+//                 "lastChangedDate": { "S": "2024-07-10T12:34:56.789Z" }
+//               }
+//             },
+//             {
+//               "M": {
+//                 "password": { "S": "U2FsdGVkX1+ANWNsnt2tWHS/YA+fcY7m7oXdKgQ9DY=" },
+//                 "username": { "S": "anotheruser" },
+//                 "dateAdded": { "S": "2024-07-10T13:45:00.000Z" },
+//                 "lastChangedDate": { "S": "2024-07-10T13:45:00.000Z" }
+//               }
+//             }
+//           ]
+//         }
+//       },
+//       // Other application entries...
+//     ]
+//   }
+// }
+
 
 app.post('/api/delete-password', async (req, res) => {
   const {application} = req.body;
