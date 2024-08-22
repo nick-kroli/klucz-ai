@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import HomePage from '../Pages/HomePage';
 import { useNavigate} from 'react-router-dom'; 
@@ -29,17 +30,20 @@ const HomeContainer = () => {
     };
   
     getAppsList().then(result => {
-      // Access result here
   
-      // console.log("RES", result[0]);
       setAppsMap(result[0]);
+      //testing appsmap result
+      // for(let i =  0; i < Object.entries(appsMap).length; i++){
+      //  console.log(appsMap)
+      // }
+
     }).catch(error => {
       // Handle error here
       console.error(error);
     });
   
     // console.log("APPS", Object.keys(appsMap))
-  }, []);
+  }, [appsMap]);
   // const managed_apps_list = ['app1', 'app2', 'app3', 'app4', 'app5', 'app6', 'app7', 'app8'];
 
   const handlePassSubmit = async (formData) => {
@@ -67,10 +71,13 @@ const HomeContainer = () => {
     }
   }
 
-  const handlePassDelete = async (application) => {
+  
+
+  const handlePassDelete = async (app_obj, pass_id, application) => {
     try{
       const token = localStorage.getItem('token');
-      await axios.post('http://localhost:3001/api/delete-password', {application}, {
+      // console.log("trying this with 'application_id':  ", application_id, "and the name being", application_name);
+      await axios.post('http://localhost:3001/api/delete-password', {pass_id, application}, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -78,7 +85,7 @@ const HomeContainer = () => {
 
       setAppsMap(prevState => {
         const newState = { ...prevState };
-        delete newState[application];
+        delete newState[app_obj];
         return newState;
       });
 
@@ -87,11 +94,10 @@ const HomeContainer = () => {
     }
   }
 
-  const handlePassRetrieve = async (application) => {
-    console.log("Retrieving password for: ", application);
-    return(appsMap[application])
-    
-  }
+  // const handlePassRetrieve = async (application) => {
+  //   console.log("Retrieving password for: ", application);
+  //   return(appsMap[application])
+  // }
 
   return <HomePage managed_apps={appsMap} onPassSubmit={handlePassSubmit} onPassDelete={handlePassDelete}/>;
 };

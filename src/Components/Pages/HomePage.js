@@ -4,20 +4,9 @@ import './HomePage.css';
 import AddPasswordPopup from './AddPasswordPopup';
 import DeletePopup from './DeletePopup';
 import applications from '../Containers/applications';
-import { act } from 'react';
 
-
-const HomePage = ({ managed_apps , onPassSubmit, onPassDelete}) => {
-  const managed_apps_keys = Object.keys(managed_apps);
+const HomePage = ({ managed_apps , onPassSubmit, onPassDelete }) => {
   const [isCollapsed, setCollapsed] = useState(true);
-  // const [passwordVisibility, setPasswordVisibility] = useState(
-  //   Array(managed_apps_keys.length).fill(false)
-  // );
-
-  
-  // console.log("keys length: ",managed_apps_keys.length);
-
-
   const [showSubcategories, setShowSubcategories] = useState(false);
   const subcategoriesRef = useRef(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -25,12 +14,11 @@ const HomePage = ({ managed_apps , onPassSubmit, onPassDelete}) => {
   const [activeCategory, setActiveCategory] = useState(null);
   const [isExiting, setIsExiting] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
-  const [passDisplay, setPassDisplay] = useState('categories');
   const [isEntryPop, setIsEntryPop] = useState(false);
   const [isDeleteSure, setIsDeleteSure] = useState(false);
   const [showPass, setShowPass] = useState(false);
   const [currentPass, setCurrentPass] = useState("");
-
+  const [currentDeletingApp, setCurrentDeletingApp] = useState(null);
 
   const toggleCollapse = () => {
     setCollapsed(!isCollapsed);
@@ -40,38 +28,35 @@ const HomePage = ({ managed_apps , onPassSubmit, onPassDelete}) => {
     setShowSubcategories(!showSubcategories);
   };
 
-  const toggleDisplayMode = () => {
-    setPassDisplay(prevMode => (prevMode === 'categories' ? 'showall' : 'categories'));
-  };
-
   const toggleEntryPop1 = () => {
     setIsEntryPop(!isEntryPop);
     console.log("Pop up: ", isEntryPop);
   }
 
-  const toggleDeletePop = () => {
+  const toggleDeletePop = (app = null) => {
     setIsDeleteSure(!isDeleteSure);
-    console.log("Pop up: ", isDeleteSure);
-  }
-
+    if (app) {
+      setCurrentDeletingApp(app);
+    }
+  };
   const handlePassSubmit = (formData) => {
-    // Handle form data 
     console.log('Form submitted:', formData);
-    toggleEntryPop1(); // Close the pop-up after submission
+    toggleEntryPop1();
     onPassSubmit(formData);
   };
 
-  const handlePassDelete = (app, e) => {
-    e.stopPropagation();
-    toggleDeletePop();
-    console.log("Deleting password....", app);
-    onPassDelete(app);
+  const handlePassDelete = (app_obj, passId, appName, e) => {
+    //e.stopPropagation();
+    // console.log("Deleting password....", passId);
+    onPassDelete(app_obj, passId, appName);
+    toggleDeletePop(); // Close the popup after deletion
+  };
+
+  const handlePassRetrieve = (app_index) => {
+    const password = entry_list[app_index];
+    setCurrentPass(password);
   }
 
-  const handlePassRetrieve = (app) => {
-    setCurrentPass(managed_apps[app]);
-  }
-  
   const toggleShowPass = () => {
     setShowPass(!showPass);
   }
@@ -84,28 +69,27 @@ const HomePage = ({ managed_apps , onPassSubmit, onPassDelete}) => {
         subcategoriesRef.current.style.maxHeight = '0px';
       }
     }
-  }, [showSubcategories,managed_apps_keys.length]);
+  }, [showSubcategories, managed_apps]);
 
   const copyClipboard = (text) => {
     navigator.clipboard.writeText(text).then(function() {
+      console.log('Copied to clipboard');
     }).catch(function(error) {
       console.error("Error copying text: ", error);
     });
   };
 
   const toggleSmallPass = (index, category) => {
-    setShowPass(false)
+    setShowPass(false);
     if (activeCategory === category && activeIndex === index) {
-      // console.log("LEAVING1");
       setIsExiting(true);
       setTimeout(() => {
         setActiveCategory(null);
         setActiveIndex(null);
         setIsExiting(false);
         setShowDetails(false);
-      }, 350); // match this duration to the CSS animation duration
+      }, 350);
     } else {
-      // handlePassRetrieve(app);
       setActiveCategory(category);
       setActiveIndex(index);
       setShowDetails(true);
@@ -113,57 +97,41 @@ const HomePage = ({ managed_apps , onPassSubmit, onPassDelete}) => {
   };
 
   const SmallPassFuncs = (app, index, category) => {
-
     toggleSmallPass(index, category);
-    handlePassRetrieve(app)
+    handlePassRetrieve(app);
   }
 
-  const categorizeApps = (apps, appCategories) => {
-    const categorized = {};
-    // console.log("APPS LIST: " , apps)
-    for(let appName = 0; appName < apps.length; appName++){
-      var category = "";
-      // console.log("trying to obtain category with name: ", apps[appName], "and gets: ", appCategories[apps[appName]]);
-      if(appCategories[apps[appName]]){
-        console.log("hits: ", apps[appName]);
-        category = appCategories[apps[appName]];
-      } else {
-        category = "Miscellaneous";
-      }
-      if(!categorized[category]){
-        categorized[category] = []
-      }
-      try {
-        // console.log("pushing: ", apps[appName]);
-        categorized[category].push(apps[appName])
-        // console.log(categorized[category]);
-      } catch (err){
-        console.log(err);
+  const parseResponse = (managed_apps) => {
+    const entryList = [];
+    // console.log(managed_apps);
+    //console.log(typeof('sec', managed_apps[0]));
+    for (const appKey of Object.keys(managed_apps)) {
+      const accounts = Array.isArray(managed_apps[appKey]) ? managed_apps[appKey] : [managed_apps[appKey]];
+      for (const appAccount of accounts) {
+        // console.log(appAccount)
+        const newEntry = { "appName": appKey, ...appAccount };
+        entryList.push(newEntry);
       }
     }
-    
-    // Object.entries(apps).forEach(appName => {
-    //   var category = ""
-    //   if(appCategories[appName]){
-    //     category = appCategories[appName];
-    //   } else{
-    //     category = 'Miscellaneous';
-    //   }
-      
-    //   if(!categorized[category]){
-    //     categorized[category] = [];
-    //   }
-    //   categorized[category].push(appName);
-      
-    // });
+    return entryList;
+  }
+
+  const categorizeEntries = (entries) => {
+    const categorized = {};
+    for (const entry of entries) {
+      const category = applications[entry.appName] || "Miscellaneous";
+      if (!categorized[category]) {
+        categorized[category] = [];
+      }
+      categorized[category].push(entry);
+    }
     return categorized;
-  };
+  }
 
-  const date_changed = "06/17/2024";
-  const date_added = "06/01/2024";
-  const categorizedApps = categorizeApps(Object.keys(managed_apps), applications);
-  // console.log(categorizedApps);
-
+  const entry_list = parseResponse(managed_apps);
+  // console.log(entry_list);
+  const categorizedApps = categorizeEntries(entry_list);
+  //console.log(categorizedApps);
 
   return (
     <div className="home-page">
@@ -171,7 +139,6 @@ const HomePage = ({ managed_apps , onPassSubmit, onPassDelete}) => {
         <button onClick={toggleCollapse}>
           {isCollapsed ? 'Expand' : 'Collapse'}
         </button>
-        {/* Add your sidebar content here */}
         <nav>
           <ul>
             <li><a href="#section1">Dashboard</a></li>
@@ -180,7 +147,7 @@ const HomePage = ({ managed_apps , onPassSubmit, onPassDelete}) => {
               <ul
                 className={`subcategories ${showSubcategories ? 'open' : ''}`}
                 ref={subcategoriesRef}
-                style={{marginTop:'5px'}}
+                style={{ marginTop: '5px' }}
               >
                 <li className='sidebar-item'><a href='personal-passwords'>Personal</a></li>
                 <li className='sidebar-item'><a href='professional-passwords'>Professional</a></li>
@@ -198,15 +165,12 @@ const HomePage = ({ managed_apps , onPassSubmit, onPassDelete}) => {
         </nav>
       </div>
       <div className="content">
-        <div className='dashboard'>
-          
-        </div>
+        <div className='dashboard'></div>
 
         {isEntryPop && (
           <AddPasswordPopup onClose={toggleEntryPop1} onSubmit={handlePassSubmit} />
         )}
 
-        
         <div className='password-search'>
           <div>
             <button onClick={toggleEntryPop1}>New Password</button>
@@ -219,57 +183,58 @@ const HomePage = ({ managed_apps , onPassSubmit, onPassDelete}) => {
             className="search-input"
           />
 
-          <div class="toggle-switch">
-            <input type="checkbox" id="toggle" class="toggle-input"/>
-            <label npm for="toggle" class="toggle-label">
-              <span class="toggle-text">Categories</span>
-              <span class="toggle-text">Show All</span>
-              <div class="toggle-handle"></div>
+          <div className="toggle-switch">
+            <input type="checkbox" id="toggle" className="toggle-input" />
+            <label htmlFor="toggle" className="toggle-label">
+              <span className="toggle-text">Categories</span>
+              <span className="toggle-text">Show All</span>
+              <div className="toggle-handle"></div>
             </label>
           </div>
         </div>
-
 
         {Object.keys(categorizedApps).map((category) => (
           <div className='big-password-container' key={category}>
             <div className='category-title'>{category}</div>
             {categorizedApps[category].map((app, index) => (
-              <div 
-                style={{width:'100%', alignItems:'center', justifyContent:'center', display:'flex', flexDirection:'column'}} 
-                key={index}
+              <div
+                style={{ width: '100%', alignItems: 'center', justifyContent: 'center', display: 'flex', flexDirection: 'column' }}
+                key={`${category}-${index}`}
               >
-                {isDeleteSure && (
-                  <DeletePopup onClose={toggleDeletePop} onSubmit={(e) => handlePassDelete(app, e)} />
-                )}
-                <div 
-                  className={`small-password-container ${showDetails && (activeCategory === category && activeIndex === index - 1)? 'expanded' : ''}`} 
+                {isDeleteSure && currentDeletingApp && (
+                  <DeletePopup 
+                    onClose={() => toggleDeletePop()}
+                    onSubmit={(e) => handlePassDelete(currentDeletingApp, currentDeletingApp.pass_id, currentDeletingApp.appName, e)} 
+                  />)
+                }
+                
+                <div
+                  className={`small-password-container ${showDetails && (activeCategory === category && activeIndex === index) ? 'expanded' : ''}`}
                   onClick={() => SmallPassFuncs(app, index, category)}
                 >
                   <div className="password-row">
-                    <input 
-                      type="checkbox" 
+                    <input
+                      type="checkbox"
                       className="select-box"
                     />
                     <span className="star-box">★</span>
                     <span className="delete-box" onClick={(e) => {
                       e.stopPropagation();
-                      toggleDeletePop();
+                      toggleDeletePop(app);
                     }}>🗑️</span>
-                    <span className="app-name">{app}</span>
-                    <span className="username">user/email: <b>nickk@gmail.com</b></span>
-                    <span className='password-last-changed'>Last Changed: 06/17/2024</span>
-                    <span className='password-added-date'>Added: 06/01/2024</span>
+                    <span className="app-name">{app.appName}</span>
+                    <span className="username">user/email: <b>{app.username}</b></span>
+                    <span className='password-last-changed'>Last Changed: {app.lastChangedDate}</span>
+                    <span className='password-added-date'>Added: {app.dateAdded}</span>
                   </div>
                 </div>
                 {showDetails && activeCategory === category && activeIndex === index && (
-                  <div
-                    className={`password-details ${isExiting ? 'password-details-exit' : 'password-details-enter'}`}
-                  >
-                    <div style={{paddingLeft:'25%'}}> Password: {showPass ? currentPass : '  ********'}</div>
-                    <div style={{display: 'flex', marginLeft: 'auto'}}>
+                  <div className={`password-details ${isExiting ? 'password-details-exit' : 'password-details-enter'}`}>
+                    <div style={{ paddingLeft: '25%' }}> Password: {showPass ? app.password : '  ********'}</div>
+                    <div style={{ display: 'flex', marginLeft: 'auto' }}>
                       <button onClick={toggleShowPass}>{showPass ? 'Hide' : 'Show'}</button>
                       <button>Edit</button>
-                      <button onClick={() => copyClipboard(currentPass)}>Copy</button>
+                      <button onClick={() => copyClipboard(app.password)}>Copy</button>
                     </div>
                   </div>
                 )}

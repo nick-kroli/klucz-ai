@@ -1,0 +1,46 @@
+{
+  "username": {
+    "S": "testuser2"
+  },
+  "managed-apps": {
+    "L": [
+      {
+        "M": {
+          "Audible": {
+            "S": "U2FsdGVkX19umBXpF84xwCRNbYAei/rCGtjNsJ1nPOE="
+          },
+          "Duke Energy": {
+            "S": "U2FsdGVkX1/GDl9tSy3V48TRIERPW+7mAk5nSTPbw7w="
+          },
+          "Gmail": {
+            "S": "U2FsdGVkX1+CANWNsnt2tWHS/YA+fcY7m7oXdKgQ9DY="
+          },
+          "Instagram": {
+            "S": "U2FsdGVkX1/wwroUNGRNJroR9vrTUMbOoSM1mQ5gZaI="
+          },
+          "Khan Academy": {
+            "S": "U2FsdGVkX1+rHZajTrKF50oMfUIxSf/zn/thHLP3kSQ="
+          },
+          "PlayStation Network": {
+            "S": "U2FsdGVkX19Rz/G72aQ7QV8EYKsox1MFX4gQRmhUWL+7FJKe/00MESV9/U0Px4Ny"
+          },
+          "Snapchat": {
+            "S": "U2FsdGVkX1/Dm7wlBgDOiL5BTL3wOUKEul9yo0yrjB0="
+          },
+          "SoundCloud": {
+            "S": "U2FsdGVkX1+Q3bYvu66lg+PpPgNnoTvygaZ2Ao+2J/U="
+          },
+          "Twitter": {
+            "S": "U2FsdGVkX1+xFKzB3Mqq8ASG4wm3ZJEnkLkgGoGJz7E="
+          },
+          "Venmo": {
+            "S": "U2FsdGVkX19vsvM/lK1mEtiwZ0c//QlhQou6CJPIWTg="
+          },
+          "Xbox Live": {
+            "S": "U2FsdGVkX19zozP9JAaK6LNRINQ7RmkjWnfoyJylUkk="
+          }
+        }
+      }
+    ]
+  }
+}

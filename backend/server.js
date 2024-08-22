@@ -4,7 +4,7 @@ require('dotenv').config();
 
 const AWS = require('aws-sdk');
 
-
+const { v4: uuidv4 } = require('uuid');
 const express = require('express');
 const cors = require('cors');
 const app = express();
@@ -207,7 +207,7 @@ app.post('/api/add-first-managed', (req, res) => {
   }
   const decoded = jwt.verify(token, SECRET_KEY);
   const username = decoded.username;
-  console.log("Adding the following apps: ", selectedApps, "for user: ", username);
+  // console.log("Adding the following apps: ", selectedApps, "for user: ", username);
 });
 
 
@@ -215,9 +215,9 @@ app.post('/api/add-first-managed', (req, res) => {
 
 app.post('/api/get-password-info', async (req, res) => {
   // console.log("AT LEAST GETS HERE");
-  console.log("HEADERS: ", req.headers);
+  // console.log("HEADERS: ", req.headers);
   const token = req.headers.authorization?.split(' ')[1];
-  console.log("TOKEN", token);
+  // console.log("TOKEN", token);
   if (!token) {
     return res.status(401).json({ message: 'No token provided' });
   }
@@ -235,6 +235,7 @@ app.post('/api/get-password-info', async (req, res) => {
   try{
     const data = await dynamoDb.get(params).promise();
     managed_apps = data.Item['managed-apps'];
+    // console.log(managed_apps);
     res.status(200).json(managed_apps);
 
   } catch (err){
@@ -285,138 +286,196 @@ app.post('/api/get-password-info', async (req, res) => {
 // });
 
 
+// app.post('/api/add-new-password', async (req, res) => {
+//   const { application, app_user, encryptedPass } = req.body;
+//   // console.log(req.body);
+//   // console.log("ENC", encryptedPass);
+//   // console.log()
+//   const token = req.headers.authorization?.split(' ')[1];
+
+
+//   if (!token) {
+//     return res.status(401).json({ message: 'No token provided' });
+//   }
+//   try {
+//     const decoded = jwt.verify(token, SECRET_KEY);
+//     const username = decoded.username;
+//     const today = new Date()
+//     let formattedDate = today.toLocaleDateString('en-US', {
+//       year: 'numeric',
+//       month: '2-digit',
+//       day: '2-digit'
+//     });
+
+//     const updateParams = {
+//       TableName: 'klucz-ai-passwordTestTable',
+//       Key: {
+//         username: username,
+//       },
+//       UpdateExpression: 'SET #managedApps[0].#appName = :encryptedPass',
+//       ExpressionAttributeNames: {
+//         '#managedApps': 'managed-apps',
+//         '#appName': application,
+//       },
+//       ExpressionAttributeValues: {
+//         ':encryptedPass': encryptedPass,
+//       },
+//       ReturnValues: 'UPDATED_NEW',
+//     };
+
+//     await dynamoDb.update(updateParams).promise();
+//     res.status(200).json({ message: 'New application password added successfully' });
+
+//   } catch (err) {
+//     console.log(err);
+//     res.status(500).json({ message: 'Internal server error, error adding app to list' });
+//   }
+// });
+
 app.post('/api/add-new-password', async (req, res) => {
+  
   const { application, app_user, encryptedPass } = req.body;
-  // console.log(req.body);
-  // console.log("ENC", encryptedPass);
-  // console.log()
   const token = req.headers.authorization?.split(' ')[1];
-
-
   if (!token) {
     return res.status(401).json({ message: 'No token provided' });
   }
+
   try {
+    const uniqueId = uuidv4();
     const decoded = jwt.verify(token, SECRET_KEY);
     const username = decoded.username;
-    const today = new Date()
-    let formattedDate = today.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit'
-    });
+    const today = new Date();
+    const formattedDate = today.toISOString().split('T')[0];
 
+    // Retrieve the current managed apps for the user
+    const getParams = {
+      TableName: 'klucz-ai-passwordTestTable',
+      Key: { username: username }
+    };
+
+    const user = await dynamoDb.get(getParams).promise();
+
+    if (!user.Item) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    let managedApps = user.Item['managed-apps'] || [];
+
+    // Find the index of the managed-apps entry
+    let managedAppEntry = managedApps.find(app => app[application]);
+
+    if (managedAppEntry) {
+      // Application exists, append the new account
+      managedAppEntry[application].push({
+        pass_id: uniqueId,
+        username: app_user,
+        dateAdded: formattedDate,
+        lastChangedDate: formattedDate,
+        password: encryptedPass
+      });
+    } else {
+      // Application does not exist, create a new entry
+      managedApps[0][application] = [{
+        pass_id: uniqueId,
+        username: app_user,
+        dateAdded: formattedDate,
+        lastChangedDate: formattedDate,
+        password: encryptedPass
+      }];
+    }
+
+    // Update the managed-apps attribute in DynamoDB
     const updateParams = {
       TableName: 'klucz-ai-passwordTestTable',
-      Key: {
-        username: username,
-      },
-      UpdateExpression: 'SET #managedApps[0].#appName = :encryptedPass',
+      Key: { username: username },
+      UpdateExpression: 'SET #managedApps = :updatedApps',
       ExpressionAttributeNames: {
-        '#managedApps': 'managed-apps',
-        '#appName': application,
+        '#managedApps': 'managed-apps'
       },
       ExpressionAttributeValues: {
-        ':encryptedPass': encryptedPass,
+        ':updatedApps': managedApps
       },
-      ReturnValues: 'UPDATED_NEW',
+      ReturnValues: 'UPDATED_NEW'
     };
 
     await dynamoDb.update(updateParams).promise();
     res.status(200).json({ message: 'New application password added successfully' });
-
   } catch (err) {
-    console.log(err);
+    console.error(err);
     res.status(500).json({ message: 'Internal server error, error adding app to list' });
   }
 });
 
-// WANT TO CHANGE TO THIS STRUCTURE BELOW TO IMPLEMENT MULTIPLE ACCOUNTS PER APP, USER, AND DATES
-// {
-//   "username": {
-//     "S": "testuser2"
-//   },
-//   "managed-apps": {
-//     "L": [
-//       {
-//         "M": {
-//           "Gmail": [
-//             {
-//               "M": {
-//                 "password": { "S": "U2FsdGVkX1+CANWNsnt2tWHS/YA+fcY7m7oXdKgQ9DY=" },
-//                 "username": { "S": "testuser2" },
-//                 "dateAdded": { "S": "2024-07-10T12:34:56.789Z" },
-//                 "lastChangedDate": { "S": "2024-07-10T12:34:56.789Z" }
-//               }
-//             },
-//             {
-//               "M": {
-//                 "password": { "S": "U2FsdGVkX1+ANWNsnt2tWHS/YA+fcY7m7oXdKgQ9DY=" },
-//                 "username": { "S": "anotheruser" },
-//                 "dateAdded": { "S": "2024-07-10T13:45:00.000Z" },
-//                 "lastChangedDate": { "S": "2024-07-10T13:45:00.000Z" }
-//               }
-//             }
-//           ]
-//         }
-//       },
-//       // Other application entries...
-//     ]
-//   }
-// }
-
 
 app.post('/api/delete-password', async (req, res) => {
-  const {application} = req.body;
-
+  const { pass_id, application } = req.body;
   const token = req.headers.authorization?.split(' ')[1];
-
+  // console.log("do you get in?, received ", pass_id, "and", application);
   if (!token) {
     return res.status(401).json({ message: 'No token provided' });
   }
 
   try {
-
     const decoded = jwt.verify(token, SECRET_KEY);
     const username = decoded.username;
+    // console.log('receives user: ', username);
+    // Retrieve the current managed apps for the user
 
+    const getParams = {
+      TableName: 'klucz-ai-passwordTestTable',
+      Key: { username: username }
+    };
+
+    const user = await dynamoDb.get(getParams).promise();
+
+    if (!user.Item) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    let managedApps = user.Item['managed-apps'] || [];
+
+    // Find the application entry
+    let managedAppEntry = managedApps[0][application];
+
+    if (!managedAppEntry) {
+      return res.status(404).json({ message: 'Application not found' });
+    }
+
+    // Find the index of the password entry to be deleted
+    const passwordIndex = managedAppEntry.findIndex(entry => entry.pass_id === pass_id);
+
+    if (passwordIndex === -1) {
+      return res.status(404).json({ message: 'Password entry not found' });
+    }
+
+    // Remove the password entry
+    managedAppEntry.splice(passwordIndex, 1);
+
+    // If the application has no more passwords, remove the entire application entry
+    if (managedAppEntry.length === 0) {
+      delete managedApps[0][application];
+    }
+
+    // Update the managed-apps attribute in DynamoDB
     const updateParams = {
       TableName: 'klucz-ai-passwordTestTable',
-      Key: {
-        username: username,
-      },
-      UpdateExpression: 'REMOVE #managedApps[0].#appName',
+      Key: { username: username },
+      UpdateExpression: 'SET #managedApps = :updatedApps',
       ExpressionAttributeNames: {
-        '#managedApps': 'managed-apps',
-        '#appName': application,
+        '#managedApps': 'managed-apps'
       },
-      ReturnValues: 'UPDATED_NEW',
+      ExpressionAttributeValues: {
+        ':updatedApps': managedApps
+      },
+      ReturnValues: 'UPDATED_NEW'
     };
-    
+
     await dynamoDb.update(updateParams).promise();
-    res.status(200).json({ message: 'Application password deleted successfully' });
-
+    res.status(200).json({ message: 'Password entry deleted successfully' });
   } catch (err) {
-    console.log(err);
-    res.status(500).json({ message: 'Internal server error, error adding app to list' });
+    console.error(err);
+    res.status(500).json({ message: 'Internal server error, error deleting password entry' });
   }
- 
-});
-
-
-app.post('/api/retrieve-password', async (req, res) => {
-  const {application} = req.body;
-  const decoded = jwt.verify(token, SECRET_KEY);
-  const username = decoded.username;
-
-
-
-});
-
-
-
-app.listen(3000, () => {
-  console.log('Server running on port 3000');
 });
 
 app.listen(PORT, () => {
