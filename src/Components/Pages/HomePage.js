@@ -4,8 +4,9 @@ import './HomePage.css';
 import AddPasswordPopup from './AddPasswordPopup';
 import DeletePopup from './DeletePopup';
 import applications from '../Containers/applications';
+import UpdatePopup from './UpdatePopup';
 
-const HomePage = ({ managed_apps , onPassSubmit, onPassDelete }) => {
+const HomePage = ({ managed_apps , onPassSubmit, onPassDelete , onPassUpdate}) => {
   const [isCollapsed, setCollapsed] = useState(true);
   const [showSubcategories, setShowSubcategories] = useState(false);
   const subcategoriesRef = useRef(null);
@@ -19,6 +20,8 @@ const HomePage = ({ managed_apps , onPassSubmit, onPassDelete }) => {
   const [showPass, setShowPass] = useState(false);
   const [currentPass, setCurrentPass] = useState("");
   const [currentDeletingApp, setCurrentDeletingApp] = useState(null);
+  const [currentUpdatingApp, setCurrentUpdatingApp] = useState(null);
+  const [isUpdating, setIsUpdating] = useState(null);
 
   const toggleCollapse = () => {
     setCollapsed(!isCollapsed);
@@ -39,6 +42,20 @@ const HomePage = ({ managed_apps , onPassSubmit, onPassDelete }) => {
       setCurrentDeletingApp(app);
     }
   };
+
+  const toggleUpdatePop = (app = null) => {
+    setIsUpdating(!isUpdating);
+    if (app) {
+      setCurrentUpdatingApp(app);
+      console.log("HERE THE UPDATING APP IS ", app)
+    }
+  }
+
+  const handlePassUpdate = (passId, appName, updatedData) => {
+    // console.log("ID: ", passId, "UPDATED", updatedData);
+    onPassUpdate(passId, appName, updatedData);
+    toggleUpdatePop();
+  }
   const handlePassSubmit = (formData) => {
     console.log('Form submitted:', formData);
     toggleEntryPop1();
@@ -207,7 +224,15 @@ const HomePage = ({ managed_apps , onPassSubmit, onPassDelete }) => {
                     onSubmit={(e) => handlePassDelete(currentDeletingApp, currentDeletingApp.pass_id, currentDeletingApp.appName, e)} 
                   />)
                 }
-                
+
+                {isUpdating && currentUpdatingApp && (
+                  <UpdatePopup 
+                    onClose={() => toggleUpdatePop()}
+                    onSubmit={(updatedData) => handlePassUpdate(currentUpdatingApp.pass_id, currentUpdatingApp.appName, updatedData)}
+                    initialUsername={currentUpdatingApp.username}
+                    initialPassword={currentUpdatingApp.password}
+                  />
+                )}
                 <div
                   className={`small-password-container ${showDetails && (activeCategory === category && activeIndex === index) ? 'expanded' : ''}`}
                   onClick={() => SmallPassFuncs(app, index, category)}
@@ -233,7 +258,9 @@ const HomePage = ({ managed_apps , onPassSubmit, onPassDelete }) => {
                     <div style={{ paddingLeft: '25%' }}> Password: {showPass ? app.password : '  ********'}</div>
                     <div style={{ display: 'flex', marginLeft: 'auto' }}>
                       <button onClick={toggleShowPass}>{showPass ? 'Hide' : 'Show'}</button>
-                      <button>Edit</button>
+                      <button onClick={(e) => {
+                        toggleUpdatePop(app)
+                      }}>Edit</button>
                       <button onClick={() => copyClipboard(app.password)}>Copy</button>
                     </div>
                   </div>

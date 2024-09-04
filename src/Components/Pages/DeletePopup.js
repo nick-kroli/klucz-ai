@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import "./DeletePopup.css";
+import "./Popup.css";
 
 
 const DeletePopup = ({ onClose, onSubmit }) => {

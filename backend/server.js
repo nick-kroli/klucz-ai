@@ -244,94 +244,6 @@ app.post('/api/get-password-info', async (req, res) => {
 
 });
 
-
-// app.post('/api/add-new-password', async (req, res) => {
-//   const { application, app_user, encryptedPass } = req.body;
-//   // console.log(req.body);
-//   // console.log("ENC", encryptedPass);
-//   // console.log()
-//   const token = req.headers.authorization?.split(' ')[1];
-
-
-//   if (!token) {
-//     return res.status(401).json({ message: 'No token provided' });
-//   }
-//   try {
-//     const decoded = jwt.verify(token, SECRET_KEY);
-//     const username = decoded.username;
-
-//     const updateParams = {
-//       TableName: 'klucz-ai-passwordTestTable',
-//       Key: {
-//         username: username,
-//       },
-//       UpdateExpression: 'SET #managedApps[0].#appName = :encryptedPass',
-//       ExpressionAttributeNames: {
-//         '#managedApps': 'managed-apps',
-//         '#appName': application,
-//       },
-//       ExpressionAttributeValues: {
-//         ':encryptedPass': encryptedPass,
-//       },
-//       ReturnValues: 'UPDATED_NEW',
-//     };
-
-//     await dynamoDb.update(updateParams).promise();
-//     res.status(200).json({ message: 'New application password added successfully' });
-
-//   } catch (err) {
-//     console.log(err);
-//     res.status(500).json({ message: 'Internal server error, error adding app to list' });
-//   }
-// });
-
-
-// app.post('/api/add-new-password', async (req, res) => {
-//   const { application, app_user, encryptedPass } = req.body;
-//   // console.log(req.body);
-//   // console.log("ENC", encryptedPass);
-//   // console.log()
-//   const token = req.headers.authorization?.split(' ')[1];
-
-
-//   if (!token) {
-//     return res.status(401).json({ message: 'No token provided' });
-//   }
-//   try {
-//     const decoded = jwt.verify(token, SECRET_KEY);
-//     const username = decoded.username;
-//     const today = new Date()
-//     let formattedDate = today.toLocaleDateString('en-US', {
-//       year: 'numeric',
-//       month: '2-digit',
-//       day: '2-digit'
-//     });
-
-//     const updateParams = {
-//       TableName: 'klucz-ai-passwordTestTable',
-//       Key: {
-//         username: username,
-//       },
-//       UpdateExpression: 'SET #managedApps[0].#appName = :encryptedPass',
-//       ExpressionAttributeNames: {
-//         '#managedApps': 'managed-apps',
-//         '#appName': application,
-//       },
-//       ExpressionAttributeValues: {
-//         ':encryptedPass': encryptedPass,
-//       },
-//       ReturnValues: 'UPDATED_NEW',
-//     };
-
-//     await dynamoDb.update(updateParams).promise();
-//     res.status(200).json({ message: 'New application password added successfully' });
-
-//   } catch (err) {
-//     console.log(err);
-//     res.status(500).json({ message: 'Internal server error, error adding app to list' });
-//   }
-// });
-
 app.post('/api/add-new-password', async (req, res) => {
   
   const { application, app_user, encryptedPass } = req.body;
@@ -408,7 +320,7 @@ app.post('/api/add-new-password', async (req, res) => {
 
 
 app.post('/api/delete-password', async (req, res) => {
-  const { pass_id, application } = req.body;
+  const { pass_id, application_name } = req.body;
   const token = req.headers.authorization?.split(' ')[1];
   // console.log("do you get in?, received ", pass_id, "and", application);
   if (!token) {
@@ -435,7 +347,7 @@ app.post('/api/delete-password', async (req, res) => {
     let managedApps = user.Item['managed-apps'] || [];
 
     // Find the application entry
-    let managedAppEntry = managedApps[0][application];
+    let managedAppEntry = managedApps[0][application_name];
 
     if (!managedAppEntry) {
       return res.status(404).json({ message: 'Application not found' });
@@ -453,7 +365,7 @@ app.post('/api/delete-password', async (req, res) => {
 
     // If the application has no more passwords, remove the entire application entry
     if (managedAppEntry.length === 0) {
-      delete managedApps[0][application];
+      delete managedApps[0][application_name];
     }
 
     // Update the managed-apps attribute in DynamoDB
@@ -477,6 +389,83 @@ app.post('/api/delete-password', async (req, res) => {
     res.status(500).json({ message: 'Internal server error, error deleting password entry' });
   }
 });
+
+app.post('/api/update-password', async (req, res) => {
+  const { pass_id, application_name, new_user, new_pass } = req.body;
+  const token = req.headers.authorization?.split(' ')[1];
+  console.log("For the application named ", application_name, "with the id of ", pass_id, "I am changing the username to ", new_user);
+  const today = new Date();
+  const formattedDate = today.toISOString().split('T')[0];
+
+  if (!token) {
+    return res.status(401).json({ message: 'No token provided' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, SECRET_KEY);
+    const username = decoded.username;
+
+    const getParams = {
+      TableName: 'klucz-ai-passwordTestTable',
+      Key: { username: username }
+    };
+  
+    const user = await dynamoDb.get(getParams).promise();
+
+    if (!user.Item) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    let managedApps = user.Item['managed-apps'] || [];
+    
+    let managedAppEntry = managedApps[0][application_name];
+
+    if (!managedAppEntry) {
+      return res.status(404).json({ message: 'Application not found' });
+    }
+
+    const passwordIndex = managedAppEntry.findIndex(entry => entry.pass_id === pass_id);
+    
+    if (passwordIndex === -1) {
+      return res.status(404).json({ message: 'Password entry not found' });
+    }
+
+    if (new_user !== null && new_user !== undefined) {
+      managedAppEntry[passwordIndex].username = new_user;
+    }
+
+    if (new_pass !== null && new_pass !== undefined) {
+      managedAppEntry[passwordIndex].pass = new_pass;
+    }
+
+    managedAppEntry[passwordIndex].lastChangedDate = formattedDate;
+
+    const updateParams = {
+      TableName: 'klucz-ai-passwordTestTable',
+      Key: { username: username },
+      UpdateExpression: 'SET #managedApps = :updatedApps',
+      ExpressionAttributeNames: {
+        '#managedApps': 'managed-apps'
+      },
+      ExpressionAttributeValues: {
+        ':updatedApps': managedApps
+      },
+      ReturnValues: 'UPDATED_NEW'
+    };
+
+    await dynamoDb.update(updateParams).promise();
+    res.status(200).json({ 
+      message: 'Password entry updated successfully',
+      updatedEntry: managedAppEntry[passwordIndex]
+    });
+
+    
+    
+  } catch (err){
+
+  }
+});
+
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

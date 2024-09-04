@@ -73,11 +73,11 @@ const HomeContainer = () => {
 
   
 
-  const handlePassDelete = async (app_obj, pass_id, application) => {
+  const handlePassDelete = async (app_obj, pass_id, application_name) => {
     try{
       const token = localStorage.getItem('token');
       // console.log("trying this with 'application_id':  ", application_id, "and the name being", application_name);
-      await axios.post('http://localhost:3001/api/delete-password', {pass_id, application}, {
+      await axios.post('http://localhost:3001/api/delete-password', {pass_id, application_name}, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -93,14 +93,27 @@ const HomeContainer = () => {
       console.log("Error deleting password: ", err);
     }
   }
+  const handlePassUpdate = async (pass_id, application_name, updatedData) => {
+    try{
+      const token = localStorage.getItem('token');
+      const { oldUsername, oldPassword, username, password } = updatedData;
+      // console.log("new data: ", updatedData)
+      // console.log("Going from ", oldUsername, "to ", newUsername);
+      let new_user = username;
+      let new_pass = password;
+      await axios.post('http://localhost:3001/api/update-password', {pass_id, application_name, new_user, new_pass}, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
 
-  // const handlePassRetrieve = async (application) => {
-  //   console.log("Retrieving password for: ", application);
-  //   return(appsMap[application])
-  // }
+    } catch (err){
+      console.log("Error updating password: ", err);
+    }
+  }
 
-  return <HomePage managed_apps={appsMap} onPassSubmit={handlePassSubmit} onPassDelete={handlePassDelete}/>;
+  return <HomePage managed_apps={appsMap} onPassSubmit={handlePassSubmit} onPassDelete={handlePassDelete} onPassUpdate={handlePassUpdate}/>;
 };
 
-//NEXT TASK: BIG CONTAINER EXPANDS WITH NUMBER OF APP... kinda done now. needs tweaking
+
 export default HomeContainer;
