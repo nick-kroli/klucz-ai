@@ -1,24 +1,25 @@
 import React, { useState } from 'react';
 import { useContext } from 'react';
 import { Account, AccountContext } from '../../SessionsAccount/Account.js';
+import './Login.css';
 
 const LoginPage = ({ onLogin, onCreateAccount, errorMess }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const { authenticate } = useContext(AccountContext)
-  // console.log("From LoginPage: ", errorMess)
+  const { authenticate } = useContext(AccountContext);
+
   const handleUsernameChange = (event) => {
     setUsername(event.target.value);
   };
 
   const handlePasswordChange = (event) => {
     setPassword(event.target.value);
-  };
+  };  
 
   const handleLogin = () => {
- 
     onLogin(username, password);
   };
+
   const handleCreateAccountClick = () => {
     onCreateAccount();
   };
@@ -26,8 +27,8 @@ const LoginPage = ({ onLogin, onCreateAccount, errorMess }) => {
   return (
     <div className="login-page">
       <h2>Login</h2>
-      <form>
-        <div className="">
+      <form className="login-form">
+        <div className="form-group">
           <label htmlFor="username">Username:</label>
           <input
             type="text"
@@ -37,7 +38,7 @@ const LoginPage = ({ onLogin, onCreateAccount, errorMess }) => {
             required
           />
         </div>
-        <div className="">
+        <div className="form-group">
           <label htmlFor="password">Password:</label>
           <input
             type="password"
@@ -47,13 +48,13 @@ const LoginPage = ({ onLogin, onCreateAccount, errorMess }) => {
             required
           />
         </div>
-        <div className="">
+        <div className="form-actions">
           <button type="button" onClick={handleLogin}>Login</button>
           <button type="button" onClick={handleCreateAccountClick}>Create Account</button>
         </div>
       </form>
       {errorMess && (
-        <div style={{ color: 'red', textAlign: 'center' }}>
+        <div className="error-message">
           {errorMess}
         </div>
       )}

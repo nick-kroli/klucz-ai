@@ -119,6 +119,11 @@ const HomePage = ({ managed_apps , onPassSubmit, onPassDelete , onPassUpdate}) =
   }
 
   const parseResponse = (managed_apps) => {
+
+    if (!managed_apps || Object.keys(managed_apps).length === 0){
+      return [];
+    }
+
     const entryList = [];
     // console.log(managed_apps);
     //console.log(typeof('sec', managed_apps[0]));
@@ -144,8 +149,10 @@ const HomePage = ({ managed_apps , onPassSubmit, onPassDelete , onPassUpdate}) =
     }
     return categorized;
   }
-
+  
   const entry_list = parseResponse(managed_apps);
+
+  
   // console.log(entry_list);
   const categorizedApps = categorizeEntries(entry_list);
   //console.log(categorizedApps);
@@ -199,7 +206,7 @@ const HomePage = ({ managed_apps , onPassSubmit, onPassDelete , onPassUpdate}) =
             onChange={(e) => setSearchTerm(e.target.value)}
             className="search-input"
           />
-
+          {/*
           <div className="toggle-switch">
             <input type="checkbox" id="toggle" className="toggle-input" />
             <label htmlFor="toggle" className="toggle-label">
@@ -208,67 +215,87 @@ const HomePage = ({ managed_apps , onPassSubmit, onPassDelete , onPassUpdate}) =
               <div className="toggle-handle"></div>
             </label>
           </div>
+          */}
         </div>
 
-        {Object.keys(categorizedApps).map((category) => (
-          <div className='big-password-container' key={category}>
-            <div className='category-title'>{category}</div>
-            {categorizedApps[category].map((app, index) => (
-              <div
-                style={{ width: '100%', alignItems: 'center', justifyContent: 'center', display: 'flex', flexDirection: 'column' }}
-                key={`${category}-${index}`}
-              >
-                {isDeleteSure && currentDeletingApp && (
-                  <DeletePopup 
-                    onClose={() => toggleDeletePop()}
-                    onSubmit={(e) => handlePassDelete(currentDeletingApp, currentDeletingApp.pass_id, currentDeletingApp.appName, e)} 
-                  />)
-                }
+        {/* NEED TO CONDITIONALLY RENDER AN EMPTY PASSWORD DIV, WHERE IT ENCOURAGES THE USER TO ADD THEIR FIRST PASSWORD AND ONLY RENDERS IF THEY HAVE AN EMPTY ENTRY LIST */}
+        {entry_list.length === 0 ? (
 
-                {isUpdating && currentUpdatingApp && (
-                  <UpdatePopup 
-                    onClose={() => toggleUpdatePop()}
-                    onSubmit={(updatedData) => handlePassUpdate(currentUpdatingApp.pass_id, currentUpdatingApp.appName, updatedData)}
-                    initialUsername={currentUpdatingApp.username}
-                    initialPassword={currentUpdatingApp.password}
-                  />
-                )}
+            <div className='empty-passwords' style={{height: '300px'}}>
+              <h2>Welcome to Your Password Manager!</h2>
+              <p>You haven't added any passwords yet. Click the "New Password" button to get started.</p>
+            </div>
+
+          ) : (
+
+            
+
+            Object.keys(categorizedApps).map((category) => (
+            <div className='big-password-container' key={category}>
+              <div className='category-title'>{category}</div>
+              {categorizedApps[category].map((app, index) => (
                 <div
-                  className={`small-password-container ${showDetails && (activeCategory === category && activeIndex === index) ? 'expanded' : ''}`}
-                  onClick={() => SmallPassFuncs(app, index, category)}
+                  style={{ width: '100%', alignItems: 'center', justifyContent: 'center', display: 'flex', flexDirection: 'column' }}
+                  key={`${category}-${index}`}
                 >
-                  <div className="password-row">
-                    <input
-                      type="checkbox"
-                      className="select-box"
+                  {isDeleteSure && currentDeletingApp && (
+                    <DeletePopup 
+                      onClose={() => toggleDeletePop()}
+                      onSubmit={(e) => handlePassDelete(currentDeletingApp, currentDeletingApp.pass_id, currentDeletingApp.appName, e)} 
+                    />)
+                  }
+
+                  {isUpdating && currentUpdatingApp && (
+                    <UpdatePopup 
+                      onClose={() => toggleUpdatePop()}
+                      onSubmit={(updatedData) => handlePassUpdate(currentUpdatingApp.pass_id, currentUpdatingApp.appName, updatedData)}
+                      initialUsername={currentUpdatingApp.username}
+                      initialPassword={currentUpdatingApp.password}
                     />
-                    <span className="star-box">★</span>
-                    <span className="delete-box" onClick={(e) => {
-                      e.stopPropagation();
-                      toggleDeletePop(app);
-                    }}>🗑️</span>
-                    <span className="app-name">{app.appName}</span>
-                    <span className="username">user/email: <b>{app.username}</b></span>
-                    <span className='password-last-changed'>Last Changed: {app.lastChangedDate}</span>
-                    <span className='password-added-date'>Added: {app.dateAdded}</span>
-                  </div>
-                </div>
-                {showDetails && activeCategory === category && activeIndex === index && (
-                  <div className={`password-details ${isExiting ? 'password-details-exit' : 'password-details-enter'}`}>
-                    <div style={{ paddingLeft: '25%' }}> Password: {showPass ? app.password : '  ********'}</div>
-                    <div style={{ display: 'flex', marginLeft: 'auto' }}>
-                      <button onClick={toggleShowPass}>{showPass ? 'Hide' : 'Show'}</button>
-                      <button onClick={(e) => {
-                        toggleUpdatePop(app)
-                      }}>Edit</button>
-                      <button onClick={() => copyClipboard(app.password)}>Copy</button>
+                  )}
+                  <div
+                    className={`small-password-container ${showDetails && (activeCategory === category && activeIndex === index) ? 'expanded' : ''}`}
+                    onClick={() => SmallPassFuncs(app, index, category)}
+                  >
+                    <div className="password-row">
+                      <input
+                        type="checkbox"
+                        className="select-box"
+                      />
+                      <span className="star-box">★</span>
+                      <span className="delete-box" onClick={(e) => {
+                        e.stopPropagation();
+                        toggleDeletePop(app);
+                      }}>🗑️</span>
+                      <span className="app-name">{app.appName}</span>
+                      <span className="username">user/email: <b>{app.username}</b></span>
+                      <span className='password-last-changed'>Last Changed: {app.lastChangedDate}</span>
+                      <span className='password-added-date'>Added: {app.dateAdded}</span>
                     </div>
                   </div>
-                )}
-              </div>
-            ))}
-          </div>
-        ))}
+                  {showDetails && activeCategory === category && activeIndex === index && (
+                    <div className={`password-details ${isExiting ? 'password-details-exit' : 'password-details-enter'}`}>
+                      <div style={{ paddingLeft: '25%' }}> Password: {showPass ? app.password : '  ********'}</div>
+                      <div style={{ display: 'flex', marginLeft: 'auto' }}>
+                        <button onClick={toggleShowPass}>{showPass ? 'Hide' : 'Show'}</button>
+                        <button onClick={(e) => {
+                          toggleUpdatePop(app)
+                        }}>Edit</button>
+                        <button onClick={() => copyClipboard(app.password)}>Copy</button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          ))
+
+
+            
+        )
+      }
+
+        
       </div>
     </div>
   );

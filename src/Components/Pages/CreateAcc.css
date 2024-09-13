@@ -1,6 +1,6 @@
 
-/* Login Page Container */
-.login-page {
+
+.create-account-page {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -15,8 +15,7 @@ h2 {
   margin-bottom: 20px;
 }
 
-/* Form Container */
-.login-form {
+form {
   background-color: #fff;
   padding: 30px;
   border-radius: 12px;
@@ -25,7 +24,6 @@ h2 {
   max-width: 400px;
 }
 
-/* Form Group */
 .form-group {
   margin-bottom: 20px;
 }
@@ -52,10 +50,9 @@ h2 {
   box-shadow: 0 0 8px rgba(0, 102, 204, 0.2);
 }
 
-/* Form Actions */
 .form-actions {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
 }
 
 .form-actions button {
@@ -67,7 +64,6 @@ h2 {
   font-size: 1rem;
   cursor: pointer;
   transition: background-color 0.3s ease;
-  width: 48%;
 }
 
 .form-actions button:hover {
@@ -79,7 +75,7 @@ h2 {
   box-shadow: 0 0 8px rgba(0, 102, 204, 0.2);
 }
 
-/* Error Message */
+
 .error-message {
   color: #ff4d4d;
   margin-top: 15px;
@@ -87,19 +83,9 @@ h2 {
   text-align: center;
 }
 
-/* Responsive Design */
 @media (max-width: 600px) {
-  .login-form {
+  form {
     width: 90%;
     padding: 20px;
-  }
-
-  .form-actions {
-    flex-direction: column;
-  }
-
-  .form-actions button {
-    width: 100%;
-    margin-bottom: 10px;
   }
 }

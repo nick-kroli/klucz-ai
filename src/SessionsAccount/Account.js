@@ -97,18 +97,6 @@ const Account = (props) => {
     }
   };
 
-
-
-  // LOGOUT PRE BACKEND
-  // const logout = () => {
-  //   const user = Pool.getCurrentUser();
-  //   if (user){
-  //     console.log("logging out")
-  //     user.signOut();
-  //     navigate("/login");
-  //   }
-  // };
-
   const logout = async () => {
     try{
       const token = localStorage.getItem('token');

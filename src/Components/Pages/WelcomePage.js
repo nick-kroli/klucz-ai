@@ -1,93 +1,61 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import './WelcomePage.css';
 
-const WelcomePage = ({ onSubmitClick, applications }) => {
-  const [query, setQuery] = useState('');
-  const [suggestions, setSuggestions] = useState([]);
-  const [selectedApps, setSelectedApps] = useState([]);
-  const [showButton, setShowButton] = useState(false);
-  const [isExiting, setIsExiting] = useState(false);
+const WelcomePage = ({ onSubmitClick }) => {
+  const [masterPassword, setMasterPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
 
-  const handleInputChange = (event) => {
-    const value = event.target.value;
-    setQuery(value);
+  const handleMasterPasswordChange = (event) => {
+    setMasterPassword(event.target.value);
+  };
 
-    if (value) {
-      const filteredSuggestions = applications.filter(app =>
-        app.toLowerCase().startsWith(value.toLowerCase())
-      );
-      setSuggestions(filteredSuggestions);
+  const handleConfirmPasswordChange = (event) => {
+    setConfirmPassword(event.target.value);
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    if (masterPassword !== confirmPassword) {
+      setError('Passwords do not match');
+    } else if (masterPassword.length < 8) {
+      setError('Password must be at least 8 characters long');
     } else {
-      setSuggestions([]);
+      onSubmitClick(masterPassword);
     }
   };
-
-  const handleSuggestionClick = (app) => {
-    if (!selectedApps.includes(app)) {
-      setSelectedApps([...selectedApps, app]);
-    }
-    setQuery('');
-    setSuggestions([]);
-  };
-
-  const handleRemoveClick = (app) => {
-    setSelectedApps(selectedApps.filter(selectedApp => selectedApp !== app));
-  };
-
-  const handleSubmitClick = () => {
-    onSubmitClick(selectedApps);
-  };
-
-  useEffect(() => {
-    if (selectedApps.length > 0) {
-      setShowButton(true);
-      setIsExiting(false);
-    } else if (selectedApps.length === 0 && showButton) {
-      setIsExiting(true);
-      setTimeout(() => {
-        setShowButton(false);
-        setIsExiting(false);
-      }, 500); // match this duration to the CSS animation duration
-    }
-  }, [selectedApps]);
 
   return (
-    <div>
-      <h1 >WELCOME TO KLUCZ</h1>
-      <h3>Lets get started by choosing a few applications you are interested in managing your passwords for!</h3>
+    <div className="welcome-container">
+      <h1>WELCOME</h1>
+      <h3>Let's get started by setting up your master password! This will serve as the secret key to unlocking your vault of passwords. Make sure you remember your master password as you will be locked out of your vault permanently if you lose it!</h3>
 
-      <div className="search-bar-container">
-        <input
-          type="text"
-          value={query}
-          onChange={handleInputChange}
-          placeholder="Search applications..."
-          className="search-input"
-        />
-        {suggestions.length > 0 && (
-          <ul className="suggestions-list">
-            {suggestions.map((suggestion, index) => (
-              <li key={index} onClick={() => handleSuggestionClick(suggestion)} className="suggestion-item">
-                {suggestion}
-              </li>
-            ))}
-          </ul>
-        )}
-        <div className="selected-apps">
-          {selectedApps.map((app, index) => (
-            <span key={index} className="selected-app">
-              <button className="remove-button" onClick={() => handleRemoveClick(app)}>x</button>
-              {app}
-            </span>
-          ))}
+      <form onSubmit={handleSubmit} className="password-form">
+        <div className="input-group">
+          <label htmlFor="masterPassword">Master Password</label>
+          <input
+            type="password"
+            id="masterPassword"
+            value={masterPassword}
+            onChange={handleMasterPasswordChange}
+            placeholder="Enter your master password"
+            required
+          />
         </div>
-
-        {showButton && (
-          <button className={`proceed-button ${showButton ? 'proceed-button-enter' : ''} ${isExiting ? 'proceed-button-exit' : ''}`} onClick={handleSubmitClick}>
-            Proceed to home
-          </button>
-        )}
-      </div>
+        <div className="input-group">
+          <label htmlFor="confirmPassword">Confirm Password</label>
+          <input
+            type="password"
+            id="confirmPassword"
+            value={confirmPassword}
+            onChange={handleConfirmPasswordChange}
+            placeholder="Confirm your master password"
+            required
+          />
+        </div>
+        {error && <p className="error-message">{error}</p>}
+        <button type="submit" className="submit-button">Create Master Password</button>
+      </form>
     </div>
   );
 };

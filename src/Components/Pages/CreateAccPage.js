@@ -1,6 +1,7 @@
 // CreateAccPage.js
 
 import React, { useState } from 'react';
+import './CreateAcc.css';
 
 const CreateAccPage = ({ onCreateClick, errorMess}) => {
   const [username, setUsername] = useState('');

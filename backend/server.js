@@ -44,21 +44,47 @@ const getManagedAppsSize = async (username) => {
   };
   try {
     const data = await dynamoDb.get(params).promise();
-    // console.log("GETS HERE: ", data);
+
     if (data.Item && data.Item['managed-apps']) {
-      // console.log("YES IT EXISTS: ", data.Item['managed-apps'].Object.length);
+ 
       managed_apps = data.Item['managed-apps'];
       const managedAppsSize = Object.keys(managed_apps[0]).length;
-      // console.log("APP SIZE: ", managedAppsSize);
+  
       return managedAppsSize;
     } else {
-      return 0; // Return 0 if "managed-apps" does not exist or is empty
+      return 0;
     }
   } catch (err) {
     console.error('Error retrieving item:', err);
     throw err;
   }
 };
+
+//HELPER FUNCTION FOR GETTING MASTER PASSWORD SETUP/NOT
+const getMasterExist = async(username) => {
+  const params = {
+    TableName: 'klucz-ai-passwordTestTable',
+    Key: {
+      username: username
+    }
+  };
+  try{
+    const data = await dynamoDb.get(params).promise();
+    
+    if (data.Item && data.Item['master']){
+      master = data.Item['master'];
+      console.log("MASTER: ", master)
+      const master_length = Object.keys(master).length;
+      return master_length;
+    } else {
+      return 0;
+    }
+
+  } catch (err){
+    console.error('Error retrieving master existence: ', err);
+  }
+}
+
 
 //AUTHENTICATES THE USER ATTEMPTING TO LOG, CHECKS FOR NEW OR RETURNING
 app.post('/api/authenticate', async (req, res) => {
@@ -77,9 +103,13 @@ app.post('/api/authenticate', async (req, res) => {
           // const tokenDecoded = jwt.verify(token, SECRET_KEY);
           // console.log("SERVER SIDE TOKEN DECODED: ", tokenDecoded);
 
-          const num_entries = await getManagedAppsSize(Username);
-          // console.log("NUM ENTRIES:   ", num_entries);
-          if(num_entries != 0){
+          // const num_entries = await getManagedAppsSize(Username);
+          const master_exist_num = await getMasterExist(Username);
+
+          console.log("NUM MASTER:   ", master_exist_num);
+
+
+          if(master_exist_num != 0){
             new_user = false;
           }
           // console.log("NEW USER", new_user);
@@ -136,10 +166,9 @@ app.post('/api/logout', async (req, res) => {
   }
 
   try{
-    // console.log("GETS HERE");
     const decoded = jwt.verify(token, SECRET_KEY);
     const username = decoded.username;
-    // console.log("token user: ", username);
+
     const userData = {
       Username: username,
       Pool: userPool
@@ -199,15 +228,72 @@ app.post('/api/create-account', (req, res) => {
 });
 
 
-app.post('/api/add-first-managed', (req, res) => {
-  const {selectedApps}  = req.body
+app.post('/api/master-password-init', async (req, res) => {
+  const {salt, hash}  = req.body
   const token = req.headers.authorization?.split(' ')[1];
   if (!token) {
     return res.status(401).json({ message: 'No token provided' });
   }
+
+  
   const decoded = jwt.verify(token, SECRET_KEY);
   const username = decoded.username;
-  // console.log("Adding the following apps: ", selectedApps, "for user: ", username);
+
+  console.log("SALT: ", salt, "HASH: ", hash)
+
+  try {
+    //THIS IS REPEATED SO MUCH, NEEDS TO BE PUT INTO OWN FUNCTION LATER
+    const getParams = {
+      TableName: 'klucz-ai-passwordTestTable',
+      Key: { username: username }
+    };
+  
+    const user = await dynamoDb.get(getParams).promise();
+  
+    if (!user.Item) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    const updateParams = {
+      TableName: 'klucz-ai-passwordTestTable',
+      Key: {username: username},
+      UpdateExpression: 'SET #master = :master',
+      ExpressionAttributeNames: {
+        '#master': 'master'
+      },
+      ExpressionAttributeValues: {
+        ':master': {
+          salt,
+          hash
+        }
+      },
+      ReturnValues: 'UPDATED_NEW'
+    }
+    
+    const updateParams_init = {
+      TableName: 'klucz-ai-passwordTestTable',
+      Key: { username: username },
+      UpdateExpression: 'SET #managedApps = :managedApps',
+      ExpressionAttributeNames: {
+        '#managedApps': 'managed-apps'
+      },
+      ExpressionAttributeValues: {
+        ':managedApps': [{}]
+      },
+      ReturnValues: 'UPDATED_NEW'
+    };
+
+    dynamoDb.update(updateParams_init).promise();
+
+
+    await dynamoDb.update(updateParams).promise();
+
+    res.status(200).json(true);
+
+  } catch (err){
+    console.error('Error adding master to DynamoDB:', dbError);
+    res.status(500).json({ error: 'Failed to add master info' });
+  }
 });
 
 
@@ -277,7 +363,7 @@ app.post('/api/add-new-password', async (req, res) => {
     let managedAppEntry = managedApps.find(app => app[application]);
 
     if (managedAppEntry) {
-      // Application exists, append the new account
+      
       managedAppEntry[application].push({
         pass_id: uniqueId,
         username: app_user,
@@ -286,7 +372,6 @@ app.post('/api/add-new-password', async (req, res) => {
         password: encryptedPass
       });
     } else {
-      // Application does not exist, create a new entry
       managedApps[0][application] = [{
         pass_id: uniqueId,
         username: app_user,
