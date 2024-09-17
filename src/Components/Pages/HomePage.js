@@ -5,8 +5,12 @@ import AddPasswordPopup from './AddPasswordPopup';
 import DeletePopup from './DeletePopup';
 import applications from '../Containers/applications';
 import UpdatePopup from './UpdatePopup';
+import UnlockPopup from './UnlockPopup';
+import CryptoJS from 'crypto-js';
 
-const HomePage = ({ managed_apps , onPassSubmit, onPassDelete , onPassUpdate}) => {
+
+
+const HomePage = ({ managed_apps , onPassSubmit, onPassDelete , onPassUpdate, salt, hash}) => {
   const [isCollapsed, setCollapsed] = useState(true);
   const [showSubcategories, setShowSubcategories] = useState(false);
   const subcategoriesRef = useRef(null);
@@ -22,6 +26,10 @@ const HomePage = ({ managed_apps , onPassSubmit, onPassDelete , onPassUpdate}) =
   const [currentDeletingApp, setCurrentDeletingApp] = useState(null);
   const [currentUpdatingApp, setCurrentUpdatingApp] = useState(null);
   const [isUpdating, setIsUpdating] = useState(null);
+  const [isUnlocking, setIsUnlocking] = useState(false);
+  const [masterValidated, setMasterValidated] = useState(false);
+  const [encKey, setEncKey] = useState("");
+  const [decPass, setDecPass] = useState("");
 
   const toggleCollapse = () => {
     setCollapsed(!isCollapsed);
@@ -47,8 +55,13 @@ const HomePage = ({ managed_apps , onPassSubmit, onPassDelete , onPassUpdate}) =
     setIsUpdating(!isUpdating);
     if (app) {
       setCurrentUpdatingApp(app);
-      console.log("HERE THE UPDATING APP IS ", app)
+      // console.log("HERE THE UPDATING APP IS ", app)
     }
+  }
+
+  const toggleUnlockPop = () => {
+    console.log(isUnlocking);
+    setIsUnlocking(!isUnlocking);
   }
 
   const handlePassUpdate = (passId, appName, updatedData) => {
@@ -74,8 +87,21 @@ const HomePage = ({ managed_apps , onPassSubmit, onPassDelete , onPassUpdate}) =
     setCurrentPass(password);
   }
 
+  const handleMasterValidation = (master_valid) => {
+    console.log(master_valid);
+    if(master_valid){
+      setMasterValidated(true);
+    }
+    toggleUnlockPop();
+  }
+
   const toggleShowPass = () => {
     setShowPass(!showPass);
+  }
+
+  const decryptPassword = (encryptedPassword, encKey) => {
+    const decrypted = CryptoJS.AES.decrypt(encryptedPassword, encKey);
+    return decrypted.toString((CryptoJS.enc.Utf8));
   }
 
   useEffect(() => {
@@ -98,6 +124,11 @@ const HomePage = ({ managed_apps , onPassSubmit, onPassDelete , onPassUpdate}) =
 
   const toggleSmallPass = (index, category) => {
     setShowPass(false);
+    setDecPass("");
+    if(!masterValidated){
+      console.log("enter your master password to unlock vault!");
+      toggleUnlockPop();
+    }
     if (activeCategory === category && activeIndex === index) {
       setIsExiting(true);
       setTimeout(() => {
@@ -116,6 +147,11 @@ const HomePage = ({ managed_apps , onPassSubmit, onPassDelete , onPassUpdate}) =
   const SmallPassFuncs = (app, index, category) => {
     toggleSmallPass(index, category);
     handlePassRetrieve(app);
+
+    if(masterValidated){
+      const dec = decryptPassword(app.password, encKey);
+      setDecPass(dec);
+    }
   }
 
   const parseResponse = (managed_apps) => {
@@ -155,6 +191,7 @@ const HomePage = ({ managed_apps , onPassSubmit, onPassDelete , onPassUpdate}) =
   
   // console.log(entry_list);
   const categorizedApps = categorizeEntries(entry_list);
+  // const enc_key = "test_enc";
   //console.log(categorizedApps);
 
   return (
@@ -191,14 +228,25 @@ const HomePage = ({ managed_apps , onPassSubmit, onPassDelete , onPassUpdate}) =
       <div className="content">
         <div className='dashboard'></div>
 
-        {isEntryPop && (
-          <AddPasswordPopup onClose={toggleEntryPop1} onSubmit={handlePassSubmit} />
-        )}
+        
 
         <div className='password-search'>
-          <div>
-            <button onClick={toggleEntryPop1}>New Password</button>
-          </div>
+          {
+            masterValidated ? (
+              <div>
+                <button onClick={toggleEntryPop1}>New Password</button>
+              </div>
+            ) : (
+              <div>
+                <p>Unlock your vault to add/update passwords!</p>
+                <button onClick={toggleUnlockPop}>Unlock Vault</button>
+              </div>
+              
+            )
+
+          }
+          
+          
           <input
             type="text"
             placeholder="Search passwords..."
@@ -216,9 +264,25 @@ const HomePage = ({ managed_apps , onPassSubmit, onPassDelete , onPassUpdate}) =
             </label>
           </div>
           */}
+          <div>Status: {masterValidated ? <span style={{color:'green'}}>Unlocked</span> : <span style={{color:'red'}}>Locked</span>}</div>
         </div>
 
-        {/* NEED TO CONDITIONALLY RENDER AN EMPTY PASSWORD DIV, WHERE IT ENCOURAGES THE USER TO ADD THEIR FIRST PASSWORD AND ONLY RENDERS IF THEY HAVE AN EMPTY ENTRY LIST */}
+        {isEntryPop && (
+          <AddPasswordPopup onClose={toggleEntryPop1} onSubmit={handlePassSubmit} encryptionKey={encKey}/>
+        )}
+
+
+        {isUnlocking && (
+          <UnlockPopup
+            onClose={() => toggleUnlockPop()}
+            onSubmit={(master_valid) => handleMasterValidation(master_valid)}
+            encryptionKey = {encKey}
+            setEncryptionKey = {setEncKey}
+            salt = {salt}
+            hash = {hash}
+          />
+        )}
+       
         {entry_list.length === 0 ? (
 
             <div className='empty-passwords' style={{height: '300px'}}>
@@ -238,6 +302,9 @@ const HomePage = ({ managed_apps , onPassSubmit, onPassDelete , onPassUpdate}) =
                   style={{ width: '100%', alignItems: 'center', justifyContent: 'center', display: 'flex', flexDirection: 'column' }}
                   key={`${category}-${index}`}
                 >
+
+
+
                   {isDeleteSure && currentDeletingApp && (
                     <DeletePopup 
                       onClose={() => toggleDeletePop()}
@@ -251,8 +318,10 @@ const HomePage = ({ managed_apps , onPassSubmit, onPassDelete , onPassUpdate}) =
                       onSubmit={(updatedData) => handlePassUpdate(currentUpdatingApp.pass_id, currentUpdatingApp.appName, updatedData)}
                       initialUsername={currentUpdatingApp.username}
                       initialPassword={currentUpdatingApp.password}
+                      encryptionKey = {encKey}
                     />
                   )}
+                  
                   <div
                     className={`small-password-container ${showDetails && (activeCategory === category && activeIndex === index) ? 'expanded' : ''}`}
                     onClick={() => SmallPassFuncs(app, index, category)}
@@ -273,9 +342,9 @@ const HomePage = ({ managed_apps , onPassSubmit, onPassDelete , onPassUpdate}) =
                       <span className='password-added-date'>Added: {app.dateAdded}</span>
                     </div>
                   </div>
-                  {showDetails && activeCategory === category && activeIndex === index && (
+                  {showDetails && activeCategory === category && activeIndex === index && masterValidated && (
                     <div className={`password-details ${isExiting ? 'password-details-exit' : 'password-details-enter'}`}>
-                      <div style={{ paddingLeft: '25%' }}> Password: {showPass ? app.password : '  ********'}</div>
+                      <div style={{ paddingLeft: '25%' }}> Password: {showPass ? decPass : '  ********'}</div>
                       <div style={{ display: 'flex', marginLeft: 'auto' }}>
                         <button onClick={toggleShowPass}>{showPass ? 'Hide' : 'Show'}</button>
                         <button onClick={(e) => {
@@ -288,6 +357,7 @@ const HomePage = ({ managed_apps , onPassSubmit, onPassDelete , onPassUpdate}) =
                 </div>
               ))}
             </div>
+
           ))
 
 

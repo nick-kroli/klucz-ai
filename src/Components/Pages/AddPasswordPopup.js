@@ -3,7 +3,7 @@ import CryptoJS from 'crypto-js';
 import "./AddPasswordPopup.css";
 import applications from '../Containers/applications';
 
-const AddPasswordPopup = ({onClose, onSubmit}) => {
+const AddPasswordPopup = ({onClose, onSubmit, encryptionKey}) => {
   const [applicationName, setApplicationName] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -13,7 +13,6 @@ const AddPasswordPopup = ({onClose, onSubmit}) => {
   const handleInputChange = (event) => {
     const val = event.target.value;
     setApplicationName(val);
-
     if (val) {
       const filteredSuggestions = Object.keys(applications).filter(app => app.toLowerCase().startsWith(val.toLowerCase()));
       setSuggestions(filteredSuggestions);
@@ -29,7 +28,8 @@ const AddPasswordPopup = ({onClose, onSubmit}) => {
 
   const handleSubmit = (event) => {
     // event.preventDefault();
-    const encryptedPass = CryptoJS.AES.encrypt(password, 'secret-key').toString();
+    //NEED TO USE DERIVED ENCRYPTION KEY FROM HASH
+    const encryptedPass = CryptoJS.AES.encrypt(password, encryptionKey).toString();
     const formData = {applicationName, username, password: encryptedPass};
     onSubmit(formData);
   } 

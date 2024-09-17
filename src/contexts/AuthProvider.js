@@ -8,7 +8,6 @@ export const AuthProvider = ({ children }) => {
         return stored_auth ? JSON.parse(stored_auth) : false;
     });
 
-
     const [newUser, setNewUser] = useState(() => {
         const stored_new_user = localStorage.getItem('new_user');
         return stored_new_user ? JSON.parse(stored_new_user): null;

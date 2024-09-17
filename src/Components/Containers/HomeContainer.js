@@ -4,18 +4,20 @@ import HomePage from '../Pages/HomePage';
 import { useNavigate} from 'react-router-dom'; 
 import axios from 'axios';
 import { useState } from 'react';
+import { type } from '@testing-library/user-event/dist/type';
 
 
 const HomeContainer = () => {
   const navigate = useNavigate();
   const [appsMap, setAppsMap] = useState({});
-  
+  const [masterValidated, setMasterValidated] = useState(false);
+  const [salt, setSalt] = useState('');
+  const [hash, setHash] = useState('');
 
-  useEffect(() => {
+  useEffect(() => { 
     const getAppsList = async () => {
       try{
         const token = localStorage.getItem('token');
-        // console.log("token", token);
         const response = await axios.post('http://localhost:3001/api/get-password-info', {}, {
           headers: {
             'Authorization': `Bearer ${token}`
@@ -32,18 +34,42 @@ const HomeContainer = () => {
     getAppsList().then(result => {
   
       setAppsMap(result[0]);
-      //testing appsmap result
-      // for(let i =  0; i < Object.entries(appsMap).length; i++){
-      //  console.log(appsMap)
-      // }
 
     }).catch(error => {
-      // Handle error here
       console.error(error);
     });
   
-    // console.log("APPS", Object.keys(appsMap))
+
   }, [appsMap]);
+
+
+  useEffect(() => {
+    const fetchSaltHash = async () => {
+      try{
+        const token = localStorage.getItem('token');
+        const response = await axios.post('http://localhost:3001/api/get-salt-hash', {}, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        // console.log("SALT_HASH OBJ: ", response.data);
+
+        return response.data
+      } catch (err){
+        console.log("Error getting salt and hash", err);
+      }
+    }
+    
+    fetchSaltHash().then(result => {
+      const salt = result['salt'];
+      const hash = result['hash'];
+      setSalt(salt);
+      setHash(hash);
+      console.log(salt, typeof(salt))
+    })
+    // console.log('hash: ', hash, 'salt: ', salt);
+  }, []);
+
   // const managed_apps_list = ['app1', 'app2', 'app3', 'app4', 'app5', 'app6', 'app7', 'app8'];
 
   const handlePassSubmit = async (formData) => {
@@ -112,7 +138,7 @@ const HomeContainer = () => {
     }
   }
 
-  return <HomePage managed_apps={appsMap} onPassSubmit={handlePassSubmit} onPassDelete={handlePassDelete} onPassUpdate={handlePassUpdate}/>;
+  return <HomePage managed_apps={appsMap} onPassSubmit={handlePassSubmit} onPassDelete={handlePassDelete} onPassUpdate={handlePassUpdate} salt={salt} hash={hash}/>;
 };
 
 

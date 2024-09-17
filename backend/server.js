@@ -105,10 +105,6 @@ app.post('/api/authenticate', async (req, res) => {
 
           // const num_entries = await getManagedAppsSize(Username);
           const master_exist_num = await getMasterExist(Username);
-
-          console.log("NUM MASTER:   ", master_exist_num);
-
-
           if(master_exist_num != 0){
             new_user = false;
           }
@@ -227,6 +223,30 @@ app.post('/api/create-account', (req, res) => {
   });
 });
 
+app.post('/api/get-salt-hash', async (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) {
+    return res.status(401).json({ message: 'No token provided' });
+  }
+  const decoded = jwt.verify(token, SECRET_KEY);
+  const username = decoded.username;
+
+  try {
+    const getParams = {
+      TableName: 'klucz-ai-passwordTestTable',
+      Key: {username: username}
+    };
+
+    const data = await dynamoDb.get(getParams).promise();
+    salt_hash = data.Item['master'];
+    res.status(200).json(salt_hash);
+
+  } catch (err){
+
+  }
+
+
+});
 
 app.post('/api/master-password-init', async (req, res) => {
   const {salt, hash}  = req.body
@@ -239,7 +259,7 @@ app.post('/api/master-password-init', async (req, res) => {
   const decoded = jwt.verify(token, SECRET_KEY);
   const username = decoded.username;
 
-  console.log("SALT: ", salt, "HASH: ", hash)
+  // console.log("SALT: ", salt, "HASH: ", hash)
 
   try {
     //THIS IS REPEATED SO MUCH, NEEDS TO BE PUT INTO OWN FUNCTION LATER
@@ -300,8 +320,6 @@ app.post('/api/master-password-init', async (req, res) => {
 
 
 app.post('/api/get-password-info', async (req, res) => {
-  // console.log("AT LEAST GETS HERE");
-  // console.log("HEADERS: ", req.headers);
   const token = req.headers.authorization?.split(' ')[1];
   // console.log("TOKEN", token);
   if (!token) {

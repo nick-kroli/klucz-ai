@@ -130,11 +130,56 @@
   margin-left: 15%;
   margin-right: 5%;
   margin-top: 20px;
-  padding: 10px;
+  padding: 20px;
   border-radius: 10px;
   display: flex;
-  justify-content: center; /* Center the search bar */
+  flex-direction: column;
   align-items: center;
+}
+
+.password-search button {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+.password-search button:hover {
+  background-color: #2980b9;
+}
+
+.search-input {
+  width: 100%;
+  max-width: 600px;
+  padding: 10px;
+  border: 1px solid #bdc3c7;
+  border-radius: 4px;
+  box-sizing: border-box;
+  font-size: 16px;
+  margin-bottom: 15px;
+}
+
+.password-search div {
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.password-search div:last-child {
+  margin-bottom: 0;
+  font-weight: bold;
+}
+
+.password-search span[style*="color:green"] {
+  color: #2ecc71 !important;
+}
+
+.password-search span[style*="color:red"] {
+  color: #e74c3c !important;
 }
 
 .search-input {
