@@ -13,8 +13,10 @@ const HomeContainer = () => {
   const [masterValidated, setMasterValidated] = useState(false);
   const [salt, setSalt] = useState('');
   const [hash, setHash] = useState('');
+  const [isCallingApi, setIsCallingApi] = useState('');
 
-  useEffect(() => { 
+  useEffect(() => {
+    console.log('HomeContainer useEffect runs');
     const getAppsList = async () => {
       try{
         const token = localStorage.getItem('token');
@@ -23,7 +25,6 @@ const HomeContainer = () => {
             'Authorization': `Bearer ${token}`
           }
         });
-        // console.log("RESPONSE", response.data[0]);
         return response.data
         
       }catch (err){
@@ -40,7 +41,7 @@ const HomeContainer = () => {
     });
   
 
-  }, [appsMap]);
+  }, [isCallingApi]);
 
 
   useEffect(() => {
@@ -74,6 +75,7 @@ const HomeContainer = () => {
 
   const handlePassSubmit = async (formData) => {
     try{
+      setIsCallingApi('adding');
       const token = localStorage.getItem('token');
       // console.log("token", token);
       const application = Object.values(formData)[0];
@@ -101,6 +103,8 @@ const HomeContainer = () => {
 
   const handlePassDelete = async (app_obj, pass_id, application_name) => {
     try{
+      console.log('tries to delete');
+      setIsCallingApi('deleting');
       const token = localStorage.getItem('token');
       // console.log("trying this with 'application_id':  ", application_id, "and the name being", application_name);
       await axios.post('http://localhost:3001/api/delete-password', {pass_id, application_name}, {
@@ -121,6 +125,7 @@ const HomeContainer = () => {
   }
   const handlePassUpdate = async (pass_id, application_name, updatedData) => {
     try{
+      setIsCallingApi('updating');
       const token = localStorage.getItem('token');
       const { oldUsername, oldPassword, username, password } = updatedData;
       // console.log("new data: ", updatedData)

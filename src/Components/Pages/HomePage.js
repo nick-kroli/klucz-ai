@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import Sidebar from './Sidebar';
 import './HomePage.css';
 import AddPasswordPopup from './AddPasswordPopup';
@@ -7,6 +7,8 @@ import applications from '../Containers/applications';
 import UpdatePopup from './UpdatePopup';
 import UnlockPopup from './UnlockPopup';
 import CryptoJS from 'crypto-js';
+import PieChartComponent from './PieChartComponent';
+import { render } from '@testing-library/react';
 
 
 
@@ -30,6 +32,7 @@ const HomePage = ({ managed_apps , onPassSubmit, onPassDelete , onPassUpdate, sa
   const [masterValidated, setMasterValidated] = useState(false);
   const [encKey, setEncKey] = useState("");
   const [decPass, setDecPass] = useState("");
+  const [pieData, setPieData] = useState({});
 
   const toggleCollapse = () => {
     setCollapsed(!isCollapsed);
@@ -113,6 +116,8 @@ const HomePage = ({ managed_apps , onPassSubmit, onPassDelete , onPassUpdate, sa
       }
     }
   }, [showSubcategories, managed_apps]);
+  
+  
 
   const copyClipboard = (text) => {
     navigator.clipboard.writeText(text).then(function() {
@@ -174,6 +179,17 @@ const HomePage = ({ managed_apps , onPassSubmit, onPassDelete , onPassUpdate, sa
     return entryList;
   }
 
+  // const updatePieChart = (categorizedApps) => {
+
+  //   setPieData([
+  //     { name: 'Group A', value: 400 },
+  //     { name: 'Group B', value: 300 },
+  //     { name: 'Group C', value: 300 },
+  //     { name: 'Group D', value: 200 },
+  //   ]);
+    
+  // }
+
   const categorizeEntries = (entries) => {
     const categorized = {};
     for (const entry of entries) {
@@ -186,13 +202,22 @@ const HomePage = ({ managed_apps , onPassSubmit, onPassDelete , onPassUpdate, sa
     return categorized;
   }
   
-  const entry_list = parseResponse(managed_apps);
-
-  
-  // console.log(entry_list);
-  const categorizedApps = categorizeEntries(entry_list);
+  const entry_list = useMemo(() => parseResponse(managed_apps), [managed_apps]);
+  const categorizedApps = useMemo(() => categorizeEntries(entry_list), [entry_list]);
   // const enc_key = "test_enc";
-  //console.log(categorizedApps);
+  // console.log(categorizedApps);
+
+  useEffect(() => {
+    const renderPieData = {};
+    for ( const cat_key of Object.keys(categorizedApps)){
+        renderPieData[cat_key] = 0;
+        for (const app_user of categorizedApps[cat_key]){
+          renderPieData[cat_key] += 1;
+        }
+    }
+    // console.log(renderPieData);
+    setPieData(renderPieData);
+  }, [categorizedApps])
 
   return (
     <div className="home-page">
@@ -226,7 +251,11 @@ const HomePage = ({ managed_apps , onPassSubmit, onPassDelete , onPassUpdate, sa
         </nav>
       </div>
       <div className="content">
-        <div className='dashboard'></div>
+        <div className='dashboard' style={{ height: '400px', width: '100%', maxWidth: '600px', margin: '0 auto' }}>
+          <PieChartComponent
+            data={pieData} 
+          />
+        </div>
 
         
 
