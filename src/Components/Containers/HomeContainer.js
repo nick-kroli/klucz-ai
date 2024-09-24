@@ -66,16 +66,15 @@ const HomeContainer = () => {
       const hash = result['hash'];
       setSalt(salt);
       setHash(hash);
-      console.log(salt, typeof(salt))
     })
     // console.log('hash: ', hash, 'salt: ', salt);
-  }, []);
+  }, [isCallingApi]);
 
   // const managed_apps_list = ['app1', 'app2', 'app3', 'app4', 'app5', 'app6', 'app7', 'app8'];
 
   const handlePassSubmit = async (formData) => {
     try{
-      setIsCallingApi('adding');
+      
       const token = localStorage.getItem('token');
       // console.log("token", token);
       const application = Object.values(formData)[0];
@@ -92,8 +91,8 @@ const HomeContainer = () => {
         [application]: { app_user, encryptedPass }
       }));
       // console.log("RESPONSE", response.data[0]);
+      setIsCallingApi('adding');
       return response.data
-      
     }catch (err){
       console.log("Error submitting passwords", err);
     }
@@ -104,7 +103,7 @@ const HomeContainer = () => {
   const handlePassDelete = async (app_obj, pass_id, application_name) => {
     try{
       console.log('tries to delete');
-      setIsCallingApi('deleting');
+      
       const token = localStorage.getItem('token');
       // console.log("trying this with 'application_id':  ", application_id, "and the name being", application_name);
       await axios.post('http://localhost:3001/api/delete-password', {pass_id, application_name}, {
@@ -118,14 +117,14 @@ const HomeContainer = () => {
         delete newState[app_obj];
         return newState;
       });
-
+      setIsCallingApi('deleting');
     }catch (err){
       console.log("Error deleting password: ", err);
     }
   }
   const handlePassUpdate = async (pass_id, application_name, updatedData) => {
     try{
-      setIsCallingApi('updating');
+      
       const token = localStorage.getItem('token');
       const { oldUsername, oldPassword, username, password } = updatedData;
       // console.log("new data: ", updatedData)
@@ -137,7 +136,7 @@ const HomeContainer = () => {
           'Authorization': `Bearer ${token}`
         }
       });
-
+      setIsCallingApi('updating');
     } catch (err){
       console.log("Error updating password: ", err);
     }

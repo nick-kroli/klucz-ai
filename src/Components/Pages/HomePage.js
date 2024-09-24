@@ -98,7 +98,12 @@ const HomePage = ({ managed_apps , onPassSubmit, onPassDelete , onPassUpdate, sa
     toggleUnlockPop();
   }
 
-  const toggleShowPass = () => {
+  const toggleShowPass = (app) => {
+    if(masterValidated){
+      console.log("SETS PASSWORD");
+      const dec = decryptPassword(app.password, encKey);
+      setDecPass(dec);
+    }
     setShowPass(!showPass);
   }
 
@@ -153,14 +158,10 @@ const HomePage = ({ managed_apps , onPassSubmit, onPassDelete , onPassUpdate, sa
     toggleSmallPass(index, category);
     handlePassRetrieve(app);
 
-    if(masterValidated){
-      const dec = decryptPassword(app.password, encKey);
-      setDecPass(dec);
-    }
+    
   }
 
   const parseResponse = (managed_apps) => {
-
     if (!managed_apps || Object.keys(managed_apps).length === 0){
       return [];
     }
@@ -375,7 +376,9 @@ const HomePage = ({ managed_apps , onPassSubmit, onPassDelete , onPassUpdate, sa
                     <div className={`password-details ${isExiting ? 'password-details-exit' : 'password-details-enter'}`}>
                       <div style={{ paddingLeft: '25%' }}> Password: {showPass ? decPass : '  ********'}</div>
                       <div style={{ display: 'flex', marginLeft: 'auto' }}>
-                        <button onClick={toggleShowPass}>{showPass ? 'Hide' : 'Show'}</button>
+                        <button onClick={(e) => {
+                          toggleShowPass(app)
+                        }}>{showPass ? 'Hide' : 'Show'}</button>
                         <button onClick={(e) => {
                           toggleUpdatePop(app)
                         }}>Edit</button>
