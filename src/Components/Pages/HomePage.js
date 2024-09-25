@@ -9,7 +9,7 @@ import UnlockPopup from './UnlockPopup';
 import CryptoJS from 'crypto-js';
 import PieChartComponent from './PieChartComponent';
 import { render } from '@testing-library/react';
-
+import HealthScore from './HealthScore';
 
 
 const HomePage = ({ managed_apps , onPassSubmit, onPassDelete , onPassUpdate, salt, hash}) => {
@@ -253,11 +253,26 @@ const HomePage = ({ managed_apps , onPassSubmit, onPassDelete , onPassUpdate, sa
       </div>
       <div className="content">
         <div className='dashboard' style={{ height: '400px', width: '100%', maxWidth: '600px', margin: '0 auto' }}>
+          <h3>Password Distribution</h3>
           <PieChartComponent
             data={pieData} 
           />
         </div>
-
+        <div>
+          break
+        </div>
+        <div className='dashboard'  style={{ height: '400px', width: '100%', maxWidth: '600px', margin: '0 auto' }}>
+          <h3>Recent Activity</h3>
+        </div>
+        <div>
+          break
+        </div>
+        <div className='dashboard'  style={{ height: '400px', width: '100%', maxWidth: '600px', margin: '0 auto' }}>
+          <h3>Health Overview</h3>
+          <HealthScore
+            score={20}
+          />
+        </div>
         
 
         <div className='password-search'>

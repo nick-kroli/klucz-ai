@@ -29,10 +29,46 @@ const AddPasswordPopup = ({onClose, onSubmit, encryptionKey}) => {
   const handleSubmit = (event) => {
     // event.preventDefault();
     //NEED TO USE DERIVED ENCRYPTION KEY FROM HASH
+    // console.log('hits?');
+    console.log(evaluatePasswordStrength(password));
     const encryptedPass = CryptoJS.AES.encrypt(password, encryptionKey).toString();
     const formData = {applicationName, username, password: encryptedPass};
     onSubmit(formData);
   } 
+
+  function evaluatePasswordStrength(password) {
+    let score = 0;
+
+    if (password.length >= 12) {
+        score += 200;
+    } else if (password.length >= 10) {
+        score += 100;
+    } else {
+        score += 50;
+    }
+    
+    let categories = 0;
+    if (/[A-Z]/.test(password)) categories++;
+    if (/[a-z]/.test(password)) categories++;
+    if (/\d/.test(password)) categories++;
+    if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) categories++;
+    
+    if (categories === 4) {
+        score += 200;
+    } else if (categories === 3) {
+        score += 150;
+    } else if (categories === 2) {
+        score += 100;
+    } else {
+        score += 50;
+    }
+    
+
+    //Last 100 points for commonly used words, similar to username, years, predictable patterns, entropy maybe?
+
+
+    return score;
+}
 
   return (
     <div className="popup-overlay">

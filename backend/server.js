@@ -290,7 +290,7 @@ app.post('/api/master-password-init', async (req, res) => {
       ReturnValues: 'UPDATED_NEW'
     }
     
-    const updateParams_init = {
+    const updateParams_master_init = {
       TableName: 'klucz-ai-passwordTestTable',
       Key: { username: username },
       UpdateExpression: 'SET #managedApps = :managedApps',
@@ -303,8 +303,21 @@ app.post('/api/master-password-init', async (req, res) => {
       ReturnValues: 'UPDATED_NEW'
     };
 
-    dynamoDb.update(updateParams_init).promise();
+    const updateParams_score_init = {
+      TableName: 'klucz-ai-passwordTestTable',
+      Key: { username: username },
+      UpdateExpression: 'SET #score = :score',
+      ExpressionAttributeNames: {
+        '#score': 'security-score'
+      },
+      ExpressionAttributeValues: {
+        ':score': 1000
+      },
+      ReturnValues: 'UPDATED_NEW'
+    };
 
+    dynamoDb.update(updateParams_master_init).promise();
+    dynamoDb.update(updateParams_score_init).promise();
 
     await dynamoDb.update(updateParams).promise();
 

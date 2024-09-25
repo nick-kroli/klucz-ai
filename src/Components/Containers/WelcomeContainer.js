@@ -64,7 +64,6 @@ const WelcomeContainer = () => {
       
       const { salt, hash, encryptionKey, encryptionKeySalt } = await setupMasterPassword(masterPassword); //should only really be pulling the salt and hash here
 
-
       const response = await axios.post('http://localhost:3001/api/master-password-init', {
         salt, 
         hash
