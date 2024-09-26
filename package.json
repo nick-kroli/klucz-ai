@@ -24,6 +24,7 @@
     "react-scripts": "5.0.1",
     "recharts": "^2.12.7",
     "stream-browserify": "^3.0.0",
+    "string-similarity-js": "^2.1.4",
     "util": "^0.12.5",
     "web-vitals": "^2.1.4"
   },

@@ -73,7 +73,6 @@ const getMasterExist = async(username) => {
     
     if (data.Item && data.Item['master']){
       master = data.Item['master'];
-      console.log("MASTER: ", master)
       const master_length = Object.keys(master).length;
       return master_length;
     } else {
@@ -363,7 +362,8 @@ app.post('/api/get-password-info', async (req, res) => {
 
 app.post('/api/add-new-password', async (req, res) => {
   
-  const { application, app_user, encryptedPass } = req.body;
+  const { application, app_user, encryptedPass, password_score} = req.body;
+  console.log("receieved a score of: ", password_score);
   const token = req.headers.authorization?.split(' ')[1];
   if (!token) {
     return res.status(401).json({ message: 'No token provided' });
@@ -400,7 +400,8 @@ app.post('/api/add-new-password', async (req, res) => {
         username: app_user,
         dateAdded: formattedDate,
         lastChangedDate: formattedDate,
-        password: encryptedPass
+        password: encryptedPass,
+        score: password_score
       });
     } else {
       managedApps[0][application] = [{
@@ -408,7 +409,8 @@ app.post('/api/add-new-password', async (req, res) => {
         username: app_user,
         dateAdded: formattedDate,
         lastChangedDate: formattedDate,
-        password: encryptedPass
+        password: encryptedPass,
+        score: password_score
       }];
     }
 

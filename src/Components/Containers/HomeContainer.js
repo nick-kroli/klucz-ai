@@ -80,7 +80,10 @@ const HomeContainer = () => {
       const application = Object.values(formData)[0];
       const app_user = Object.values(formData)[1];
       const encryptedPass = Object.values(formData)[2];
-      const response = await axios.post('http://localhost:3001/api/add-new-password', {application, app_user, encryptedPass}, {
+      const score_info = Object.values(formData)[3];
+      const password_score = score_info['score']
+
+      const response = await axios.post('http://localhost:3001/api/add-new-password', {application, app_user, encryptedPass, password_score}, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
