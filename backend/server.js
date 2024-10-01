@@ -45,12 +45,19 @@ const getManagedAppsSize = async (username) => {
   try {
     const data = await dynamoDb.get(params).promise();
 
-    if (data.Item && data.Item['managed-apps']) {
- 
-      managed_apps = data.Item['managed-apps'];
-      const managedAppsSize = Object.keys(managed_apps[0]).length;
-  
-      return managedAppsSize;
+    if (data.Item && data.Item['managed-apps'] && data.Item['managed-apps'][0]) {
+      const managedApps = data.Item['managed-apps'][0];
+      let totalEntries = 0;
+
+      // Iterate through each application in the managed-apps object
+      for (const app in managedApps) {
+        if (Array.isArray(managedApps[app])) {
+          // Add the number of entries for this application
+          totalEntries += managedApps[app].length;
+        }
+      }
+
+      return totalEntries;
     } else {
       return 0;
     }
@@ -82,6 +89,10 @@ const getMasterExist = async(username) => {
   } catch (err){
     console.error('Error retrieving master existence: ', err);
   }
+}
+
+const recalculateSecurityScore = async(username) => {
+
 }
 
 
@@ -310,13 +321,44 @@ app.post('/api/master-password-init', async (req, res) => {
         '#score': 'security-score'
       },
       ExpressionAttributeValues: {
-        ':score': 1000
+        ':score': 0
       },
       ReturnValues: 'UPDATED_NEW'
     };
 
+    const updateParams_totalScore_init = {
+      TableName: 'klucz-ai-passwordTestTable',
+      Key: { username: username },
+      UpdateExpression: 'SET #totalscore = :totalscore',
+      ExpressionAttributeNames: {
+        '#totalscore': 'total-score'
+      },
+      ExpressionAttributeValues: {
+        ':totalscore': 0
+      },
+      ReturnValues: 'UPDATED_NEW'
+    }
+
+    const updateParams_count_init = {
+      TableName: 'klucz-ai-passwordTestTable',
+      Key: { username: username },
+      UpdateExpression: 'SET #count = :count',
+      ExpressionAttributeNames: {
+        '#count': 'entry-count'
+      },
+      ExpressionAttributeValues: {
+        ':count': 0
+      },
+      ReturnValues: 'UPDATED_NEW'
+    }
+
+
     dynamoDb.update(updateParams_master_init).promise();
     dynamoDb.update(updateParams_score_init).promise();
+    dynamoDb.update(updateParams_totalScore_init).promise();
+    dynamoDb.update(updateParams_count_init).promise();
+
+    
 
     await dynamoDb.update(updateParams).promise();
 
@@ -363,7 +405,7 @@ app.post('/api/get-password-info', async (req, res) => {
 app.post('/api/add-new-password', async (req, res) => {
   
   const { application, app_user, encryptedPass, password_score} = req.body;
-  console.log("receieved a score of: ", password_score);
+  // console.log("receieved a score of: ", password_score);
   const token = req.headers.authorization?.split(' ')[1];
   if (!token) {
     return res.status(401).json({ message: 'No token provided' });
@@ -389,6 +431,11 @@ app.post('/api/add-new-password', async (req, res) => {
     }
 
     let managedApps = user.Item['managed-apps'] || [];
+
+    let newCount = user.Item['entry-count'] + 1;
+    let newTotalScore = user.Item['total-score'] + password_score;
+    let newSecurityScore = Math.round(newTotalScore / newCount);
+    
 
     // Find the index of the managed-apps entry
     let managedAppEntry = managedApps.find(app => app[application]);
@@ -418,15 +465,22 @@ app.post('/api/add-new-password', async (req, res) => {
     const updateParams = {
       TableName: 'klucz-ai-passwordTestTable',
       Key: { username: username },
-      UpdateExpression: 'SET #managedApps = :updatedApps',
+      UpdateExpression: 'SET #managedApps = :updatedApps, #entryCount = :updatedCount, #totalScore = :updatedTotalScore, #securityScore = :updatedSecurityScore',
       ExpressionAttributeNames: {
-        '#managedApps': 'managed-apps'
+        '#managedApps': 'managed-apps',
+        '#entryCount': 'entry-count',
+        '#totalScore': 'total-score',
+        '#securityScore': 'security-score'
       },
       ExpressionAttributeValues: {
-        ':updatedApps': managedApps
+        ':updatedApps': managedApps,
+        ':updatedCount': newCount,
+        ':updatedTotalScore': newTotalScore,
+        ':updatedSecurityScore': newSecurityScore
       },
       ReturnValues: 'UPDATED_NEW'
     };
+    
 
     await dynamoDb.update(updateParams).promise();
     res.status(200).json({ message: 'New application password added successfully' });
@@ -457,15 +511,19 @@ app.post('/api/delete-password', async (req, res) => {
     };
 
     const user = await dynamoDb.get(getParams).promise();
-
+    
     if (!user.Item) {
       return res.status(404).json({ message: 'User not found' });
     }
 
     let managedApps = user.Item['managed-apps'] || [];
 
+    
+
     // Find the application entry
     let managedAppEntry = managedApps[0][application_name];
+
+
 
     if (!managedAppEntry) {
       return res.status(404).json({ message: 'Application not found' });
@@ -477,6 +535,11 @@ app.post('/api/delete-password', async (req, res) => {
     if (passwordIndex === -1) {
       return res.status(404).json({ message: 'Password entry not found' });
     }
+    const scoreToRemove = managedAppEntry[passwordIndex].score;
+
+    let newCount = user.Item['entry-count'] - 1;
+    let newTotalScore = user.Item['total-score'] - scoreToRemove;
+    let newSecurityScore = Math.round(newTotalScore / newCount);
 
     // Remove the password entry
     managedAppEntry.splice(passwordIndex, 1);
@@ -490,12 +553,18 @@ app.post('/api/delete-password', async (req, res) => {
     const updateParams = {
       TableName: 'klucz-ai-passwordTestTable',
       Key: { username: username },
-      UpdateExpression: 'SET #managedApps = :updatedApps',
+      UpdateExpression: 'SET #managedApps = :updatedApps, #entryCount = :updatedCount, #totalScore = :updatedTotalScore, #securityScore = :updatedSecurityScore',
       ExpressionAttributeNames: {
-        '#managedApps': 'managed-apps'
+        '#managedApps': 'managed-apps',
+        '#entryCount': 'entry-count',
+        '#totalScore': 'total-score',
+        '#securityScore': 'security-score'
       },
       ExpressionAttributeValues: {
-        ':updatedApps': managedApps
+        ':updatedApps': managedApps,
+        ':updatedCount': newCount,
+        ':updatedTotalScore': newTotalScore,
+        ':updatedSecurityScore': newSecurityScore
       },
       ReturnValues: 'UPDATED_NEW'
     };
