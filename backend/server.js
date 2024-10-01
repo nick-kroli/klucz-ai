@@ -511,19 +511,14 @@ app.post('/api/delete-password', async (req, res) => {
     };
 
     const user = await dynamoDb.get(getParams).promise();
-    
     if (!user.Item) {
       return res.status(404).json({ message: 'User not found' });
     }
 
     let managedApps = user.Item['managed-apps'] || [];
 
-    
-
     // Find the application entry
     let managedAppEntry = managedApps[0][application_name];
-
-
 
     if (!managedAppEntry) {
       return res.status(404).json({ message: 'Application not found' });
@@ -539,8 +534,8 @@ app.post('/api/delete-password', async (req, res) => {
 
     let newCount = user.Item['entry-count'] - 1;
     let newTotalScore = user.Item['total-score'] - scoreToRemove;
-    let newSecurityScore = Math.round(newTotalScore / newCount);
-
+    let newSecurityScore = newTotalScore / newCount;
+  
     // Remove the password entry
     managedAppEntry.splice(passwordIndex, 1);
 
@@ -578,9 +573,10 @@ app.post('/api/delete-password', async (req, res) => {
 });
 
 app.post('/api/update-password', async (req, res) => {
-  const { pass_id, application_name, new_user, new_pass } = req.body;
+  const { pass_id, application_name, new_user, new_pass, password_score } = req.body;
+  
   const token = req.headers.authorization?.split(' ')[1];
-  console.log("For the application named ", application_name, "with the id of ", pass_id, "I am changing the username to ", new_user);
+  console.log("For the application named ", application_name, "with the id of ", pass_id, "I am changing the username to ", new_user, 'and new score is ', password_score);
   const today = new Date();
   const formattedDate = today.toISOString().split('T')[0];
 
@@ -617,12 +613,17 @@ app.post('/api/update-password', async (req, res) => {
       return res.status(404).json({ message: 'Password entry not found' });
     }
 
+    const scoreToRemove = managedAppEntry[passwordIndex].score;
+    let newTotalScore = user.Item['total-score'] - scoreToRemove + password_score;
+    let newSecurityScore = newTotalScore / user.Item['entry-count'];
+
+
     if (new_user !== null && new_user !== undefined) {
       managedAppEntry[passwordIndex].username = new_user;
     }
 
     if (new_pass !== null && new_pass !== undefined) {
-      managedAppEntry[passwordIndex].pass = new_pass;
+      managedAppEntry[passwordIndex].password = new_pass;
     }
 
     managedAppEntry[passwordIndex].lastChangedDate = formattedDate;
@@ -630,12 +631,16 @@ app.post('/api/update-password', async (req, res) => {
     const updateParams = {
       TableName: 'klucz-ai-passwordTestTable',
       Key: { username: username },
-      UpdateExpression: 'SET #managedApps = :updatedApps',
+      UpdateExpression: 'SET #managedApps = :updatedApps, #totalScore = :updatedTotalScore, #securityScore = :updatedSecurityScore',
       ExpressionAttributeNames: {
-        '#managedApps': 'managed-apps'
+        '#managedApps': 'managed-apps',
+        '#totalScore': 'total-score',
+        '#securityScore': 'security-score'
       },
       ExpressionAttributeValues: {
-        ':updatedApps': managedApps
+        ':updatedApps': managedApps,
+        ':updatedTotalScore': newTotalScore,
+        ':updatedSecurityScore': newSecurityScore
       },
       ReturnValues: 'UPDATED_NEW'
     };
@@ -649,7 +654,8 @@ app.post('/api/update-password', async (req, res) => {
     
     
   } catch (err){
-
+    console.error(err);
+    res.status(500).json({ message: 'Internal server error, error updating password entry' });
   }
 });
 

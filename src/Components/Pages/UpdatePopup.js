@@ -1,18 +1,22 @@
 import React, { useState } from 'react';
 import "./Popup.css";
+import CryptoJS from 'crypto-js';
+import { evaluatePasswordStrength } from '../Functions/evaluatePasswordStrength';
 
-const UpdatePopup = ({ onClose, onSubmit, initialUsername, initialPassword }) => {
-  const [username, setUsername] = useState(null);
-  const [password, setPassword] = useState(null);
+const UpdatePopup = ({ onClose, onSubmit, initialUsername, initialPassword, encryptionKey}) => {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("OLD", initialUsername, username);
+    const score_info = evaluatePasswordStrength(username, password);
+    const encryptedPass = CryptoJS.AES.encrypt(password, encryptionKey).toString();    
     onSubmit({
       oldUsername: initialUsername,
       oldPassword: initialPassword,
       username,
-      password
+      encryptedPass,
+      score_info
     });
   };
 

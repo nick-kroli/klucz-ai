@@ -129,12 +129,14 @@ const HomeContainer = () => {
     try{
       
       const token = localStorage.getItem('token');
-      const { oldUsername, oldPassword, username, password } = updatedData;
+      const { oldUsername, oldPassword, username, encryptedPass, score_info } = updatedData;
       // console.log("new data: ", updatedData)
       // console.log("Going from ", oldUsername, "to ", newUsername);
       let new_user = username;
-      let new_pass = password;
-      await axios.post('http://localhost:3001/api/update-password', {pass_id, application_name, new_user, new_pass}, {
+      let new_pass = encryptedPass;
+      const password_score = score_info['score']
+  
+      await axios.post('http://localhost:3001/api/update-password', {pass_id, application_name, new_user, new_pass, password_score}, {
         headers: {
           'Authorization': `Bearer ${token}`
         }

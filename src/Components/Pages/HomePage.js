@@ -180,17 +180,6 @@ const HomePage = ({ managed_apps , onPassSubmit, onPassDelete , onPassUpdate, sa
     return entryList;
   }
 
-  // const updatePieChart = (categorizedApps) => {
-
-  //   setPieData([
-  //     { name: 'Group A', value: 400 },
-  //     { name: 'Group B', value: 300 },
-  //     { name: 'Group C', value: 300 },
-  //     { name: 'Group D', value: 200 },
-  //   ]);
-    
-  // }
-
   const categorizeEntries = (entries) => {
     const categorized = {};
     for (const entry of entries) {
