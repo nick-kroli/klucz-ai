@@ -12,7 +12,7 @@ import { render } from '@testing-library/react';
 import HealthScore from './HealthScore';
 
 
-const HomePage = ({ managed_apps , onPassSubmit, onPassDelete , onPassUpdate, salt, hash}) => {
+const HomePage = ({ managed_apps , onPassSubmit, onPassDelete , onPassUpdate, salt, hash, security_score}) => {
   const [isCollapsed, setCollapsed] = useState(true);
   const [showSubcategories, setShowSubcategories] = useState(false);
   const subcategoriesRef = useRef(null);
@@ -33,7 +33,6 @@ const HomePage = ({ managed_apps , onPassSubmit, onPassDelete , onPassUpdate, sa
   const [encKey, setEncKey] = useState("");
   const [decPass, setDecPass] = useState("");
   const [pieData, setPieData] = useState({});
-
   const toggleCollapse = () => {
     setCollapsed(!isCollapsed);
   };
@@ -240,12 +239,25 @@ const HomePage = ({ managed_apps , onPassSubmit, onPassDelete , onPassUpdate, sa
           </ul>
         </nav>
       </div>
-      <div className="content">
-        <div className='dashboard' style={{ height: '400px', width: '100%', maxWidth: '600px', margin: '0 auto' }}>
-          <h3>Password Distribution</h3>
+    <div className="content">
+      <div className='dashboard-grid'>
+        <div className='dashboard-item'>
           <PieChartComponent
-            data={pieData} 
+          data={pieData} 
           />
+        </div>
+        <div className='dashboard-item'>
+          <HealthScore
+          score={(security_score / 500) * 100}
+          />
+        </div>
+      </div>
+
+
+
+      
+        {/* <div className='dashboard' style={{ height: '400px', width: '100%', maxWidth: '600px', margin: '0 auto' }}>
+          
         </div>
         <div>
           break
@@ -257,11 +269,8 @@ const HomePage = ({ managed_apps , onPassSubmit, onPassDelete , onPassUpdate, sa
           break
         </div>
         <div className='dashboard'  style={{ height: '400px', width: '100%', maxWidth: '600px', margin: '0 auto' }}>
-          <h3>Health Overview</h3>
-          <HealthScore
-            score={20}
-          />
-        </div>
+          
+        </div> */}
         
 
         <div className='password-search'>

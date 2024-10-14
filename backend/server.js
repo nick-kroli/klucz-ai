@@ -393,8 +393,10 @@ app.post('/api/get-password-info', async (req, res) => {
   try{
     const data = await dynamoDb.get(params).promise();
     managed_apps = data.Item['managed-apps'];
-    // console.log(managed_apps);
-    res.status(200).json(managed_apps);
+    security_score = data.Item['security-score'];
+
+    console.log(security_score);
+    res.status(200).json({managed_apps, security_score});
 
   } catch (err){
     console.log(err);

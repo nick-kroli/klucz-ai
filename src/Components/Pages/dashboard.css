@@ -1,0 +1,58 @@
+.home-page {
+  padding: 20px;
+  background-color: #f0f2f5;
+}
+
+.home-page h1 {
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.health-score-dashboard {
+  background-color: white;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.health-score-dashboard h3 {
+  color: #333;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.health-score-chart {
+  position: relative;
+  height: 200px;
+  width: 100%;
+}
+
+.health-score-label {
+  position: absolute;
+  bottom: 10px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 14px;
+  color: #666;
+}
+
+.dashboard-item {
+  background-color: white;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 768px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
+

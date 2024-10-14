@@ -27,7 +27,7 @@ const HealthScoreChart = ({ score }) => {
   const options = {
     responsive: true,
     maintainAspectRatio: false,
-    cutout: '70%',
+    cutout: '75%',
     plugins: {
       tooltip: { enabled: false },
       legend: { display: false },
@@ -41,14 +41,6 @@ const HealthScoreChart = ({ score }) => {
       const xCenter = chartArea.left + (chartArea.right - chartArea.left) / 2;
       const yCenter = chartArea.top + (chartArea.bottom - chartArea.top) / 2;
       const radius = chart.outerRadius;
-
-      // Draw background for score
-      ctx.save();
-      ctx.beginPath();
-      ctx.arc(xCenter, yCenter, radius * 0.7, Math.PI, 2 * Math.PI);
-      ctx.fillStyle = 'white';
-      ctx.fill();
-      ctx.restore();
 
       // Draw needle
       const needleAngle = Math.PI * (1 - score / 100);
@@ -66,12 +58,12 @@ const HealthScoreChart = ({ score }) => {
       // Draw score text
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.font = 'bold 28px Arial';
+      ctx.font = 'bold 36px Arial';
       ctx.fillStyle = '#333';
-      ctx.fillText(score, xCenter, yCenter - radius * 0.2);
+      ctx.fillText(score, xCenter, yCenter + radius * 0.2);
 
       ctx.font = '16px Arial';
-      ctx.fillText('Health Score', xCenter, yCenter + radius * 0.2);
+      ctx.fillText('Health Score', xCenter, yCenter + radius * 0.4);
     }
   }];
 
@@ -83,10 +75,11 @@ const HealthScoreChart = ({ score }) => {
       justifyContent: 'center',
       height: '100%',
       width: '100%',
+      position: 'relative',
     }}>
       <div style={{
-        width: '220px',
-        height: '180px',
+        width: '300px',
+        height: '200px',
         position: 'relative'
       }}>
         <Doughnut data={data} options={options} plugins={plugins} />
@@ -95,9 +88,13 @@ const HealthScoreChart = ({ score }) => {
   );
 };
 
-const HealthScoreDashboard = () => {
+const HealthScoreDashboard = ({ score }) => {
   return (
     <div className='health-score-dashboard' style={{
+      backgroundColor: '#f5f5f5',
+      borderRadius: '15px',
+      padding: '20px',
+      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
       height: '400px',
       width: '100%',
       maxWidth: '600px',
@@ -107,8 +104,15 @@ const HealthScoreDashboard = () => {
       alignItems: 'center',
       justifyContent: 'center',
     }}>
-      <h3 style={{ marginBottom: '20px' }}>Health Overview</h3>
-      <HealthScoreChart score={75} />
+      <h2 style={{ 
+        marginBottom: '20px',
+        color: '#333',
+        fontWeight: 'bold',
+        textAlign: 'center'
+      }}>
+        Health Overview
+      </h2>
+      <HealthScoreChart score={score} />
     </div>
   );
 };

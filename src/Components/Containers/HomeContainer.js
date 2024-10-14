@@ -14,6 +14,7 @@ const HomeContainer = () => {
   const [salt, setSalt] = useState('');
   const [hash, setHash] = useState('');
   const [isCallingApi, setIsCallingApi] = useState('');
+  const [securityScore, setSecurityScore] = useState(0);
 
   useEffect(() => {
     console.log('HomeContainer useEffect runs');
@@ -33,9 +34,10 @@ const HomeContainer = () => {
     };
   
     getAppsList().then(result => {
-  
-      setAppsMap(result[0]);
-
+      
+      setAppsMap(result.managed_apps[0]);
+      setSecurityScore(result.security_score);
+      
     }).catch(error => {
       console.error(error);
     });
@@ -69,8 +71,6 @@ const HomeContainer = () => {
     })
     // console.log('hash: ', hash, 'salt: ', salt);
   }, [isCallingApi]);
-
-  // const managed_apps_list = ['app1', 'app2', 'app3', 'app4', 'app5', 'app6', 'app7', 'app8'];
 
   const handlePassSubmit = async (formData) => {
     try{
@@ -146,8 +146,7 @@ const HomeContainer = () => {
       console.log("Error updating password: ", err);
     }
   }
-
-  return <HomePage managed_apps={appsMap} onPassSubmit={handlePassSubmit} onPassDelete={handlePassDelete} onPassUpdate={handlePassUpdate} salt={salt} hash={hash}/>;
+  return <HomePage managed_apps={appsMap} onPassSubmit={handlePassSubmit} onPassDelete={handlePassDelete} onPassUpdate={handlePassUpdate} salt={salt} hash={hash} security_score={securityScore}/>;
 };
 
 
